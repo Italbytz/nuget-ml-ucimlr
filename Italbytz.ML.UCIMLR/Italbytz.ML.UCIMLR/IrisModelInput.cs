@@ -2,6 +2,9 @@ using Microsoft.ML.Data;
 
 namespace Italbytz.ML.UCIMLR;
 
+/// <summary>
+/// Represents the input data schema for the Iris dataset used in ML.NET models.
+/// </summary>
 public class IrisModelInput
 {
     [LoadColumn(0)]

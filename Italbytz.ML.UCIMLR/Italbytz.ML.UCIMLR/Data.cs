@@ -2,6 +2,9 @@ using Microsoft.ML;
 
 namespace Italbytz.ML.UCIMLR;
 
+/// <summary>
+/// Provides methods for loading and saving datasets for use with ML.NET.
+/// </summary>
 public static class Data
 {
     private static Stream GetStream(Dataset dataset)
@@ -22,6 +25,14 @@ public static class Data
         return stream;
     }
     
+    /// <summary>
+    /// Loads a dataset as an <see cref="IDataView"/> for use with ML.NET.
+    /// </summary>
+    /// <param name="dataset">The dataset to load.</param>
+    /// <returns>An <see cref="IDataView"/> containing the loaded data.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if the resource for the chosen dataset is not found or if loading the data fails.
+    /// </exception>
     public static IDataView Load(Dataset dataset)
     {
         var stream = GetStream(dataset);
@@ -42,6 +53,11 @@ public static class Data
         return data ?? throw new InvalidOperationException("Failed to load data");
     }
     
+    /// <summary>
+    /// Saves the specified dataset as a CSV file to the given file path.
+    /// </summary>
+    /// <param name="dataset">The dataset to save.</param>
+    /// <param name="filePath">The file path where the CSV will be saved.</param>
     public static void SaveAsCsv(Dataset dataset, string filePath)
     {
         var stream = GetStream(dataset);

@@ -2,6 +2,10 @@ using Microsoft.ML.Data;
 
 namespace Italbytz.ML.UCIMLR;
 
+/// <summary>
+/// Represents the input data schema for the Heart Disease ML model.
+/// Each property corresponds to a feature column in the dataset.
+/// </summary>
 public class HeartDiseaseModelInput
 {
     [LoadColumn(0)] [ColumnName(@"age")] public float Age { get; set; }

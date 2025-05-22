@@ -2,6 +2,10 @@ using Microsoft.ML.Data;
 
 namespace Italbytz.ML.UCIMLR;
 
+/// <summary>
+/// Represents the input data schema for the Wine Quality ML model.
+/// Each property corresponds to a feature column in the dataset.
+/// </summary>
 public class WineQualityModelInput
 {
     [LoadColumn(0)]

@@ -1,9 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
+        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
         <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <PackageVersion>9.0.0</PackageVersion>
+        <Authors>Robin Nunkesser</Authors>
+        <PackageProjectUrl>https://github.com/Italbytz/nuget-ml-ucimlr</PackageProjectUrl>
+        <Description>Provides Data Sets from the UC Irvine Machine Learning Repository for Microsoft.ML.</Description>
+        <PackOnBuild>true</PackOnBuild>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageReadmeFile>introduction.md</PackageReadmeFile>
+        <RepositoryUrl>https://github.com/Italbytz/nuget-ml-ucimlr</RepositoryUrl>
+        <LangVersion>12</LangVersion>
+        <PackRelease>true</PackRelease>
+        <IncludeSource>true</IncludeSource>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -24,5 +36,7 @@
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </EmbeddedResource>
     </ItemGroup>
-
+    <ItemGroup>
+        <None Include="../../docfx/docs/introduction.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
 </Project>

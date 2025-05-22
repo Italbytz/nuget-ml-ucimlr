@@ -1,0 +1,45 @@
+{
+  "metadata": [
+    {
+      "src": [
+        {
+          "src": "../Italbytz.ML.UCIMLR",
+          "files": [
+            "Italbytz.ML.UCIMLR/*.csproj"
+          ]
+        }
+      ],
+      "dest": "api"
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": [
+          "**/*.{md,yml}"
+        ],
+        "exclude": [
+          "_site/**"
+        ]
+      }
+    ],
+    "resource": [
+      {
+        "files": [
+          "images/**"
+        ]
+      }
+    ],
+    "output": "_site",
+    "template": [
+      "default",
+      "modern"
+    ],
+    "globalMetadata": {
+      "_appName": "Italbytz.ML.UCIMLR",
+      "_appTitle": "Italbytz.ML.UCIMLR",
+      "_enableSearch": true,
+      "pdf": false
+    }
+  }
+}
