@@ -16,12 +16,18 @@ public class AutomationTests
     [TestMethod]
     public void SimulateIris()
     {
-        var dataset = Dataset.Iris;
-        var data = Italbytz.ML.UCIMLR.Data.Load(dataset);
+        Simulate(Dataset.Iris, "class");
+    }
+
+
+    public void Simulate(Dataset dataset, string labelColumn)
+    {
+        var data = UCIMLR.Data.Load(dataset);
         var seeds = new[] { 3, 7, 13, 42, 73, 99, 256, 1024 };
         var tmpDir = Path.GetTempPath();
         var files =
-            data.GenerateTrainValidateTestCsvs(tmpDir, "Iris", seeds: seeds);
+            data.GenerateTrainValidateTestCsvs(tmpDir, dataset.ToString(),
+                seeds: seeds);
         Assert.IsNotNull(files);
         Assert.AreEqual(8, files.Count());
         foreach (var file in files)
@@ -29,26 +35,30 @@ public class AutomationTests
             var trainingData = Path.Combine(tmpDir, file.TrainFileName);
             var validationData = Path.Combine(tmpDir, file.ValidateFileName);
             var testData = Path.Combine(tmpDir, file.TestFileName);
-            var validationOption = new FileValidationOptionV0()
+            var validationOption = new FileValidationOptionV0
             {
-                FilePath = validationData,
+                FilePath = validationData
             };
-            var config = DataHelper.GenerateModelBuilderConfigForDataset(dataset,trainingData,ScenarioType.Classification,"class",20,
-                new[] { "LightGbm", "FastTree" },validationOption);
+            var config = DataHelper.GenerateModelBuilderConfigForDataset(
+                dataset, trainingData, ScenarioType.Classification, labelColumn,
+                2,
+                new[] { "LBFGS", "FASTFOREST", "SDCA", "FASTTREE" },
+                validationOption);
             var configPath = Path.Combine(tmpDir,
-                $"config.mbconfig");
+                "config.mbconfig");
             File.WriteAllText(configPath, config);
+            RunAutoMLForConfig(tmpDir, configPath);
         }
     }
 
-    private void RunAutoMLForConfig(string workingDirectory,string modelFileName)
+    private void RunAutoMLForConfig(string workingDirectory, string configFile)
     {
         var mlnet = new Process();
         mlnet.StartInfo.FileName = "mlnet";
         mlnet.StartInfo.WorkingDirectory =
             workingDirectory;
         mlnet.StartInfo.Arguments =
-            $"train --training-config {modelFileName}.mbconfig -v q";
+            $"train --training-config {configFile} -v q";
         mlnet.Start();
         mlnet.WaitForExit();
     }
@@ -70,8 +80,8 @@ public class AutomationTests
     {
         // Configure a Model Builder configuration
         var config = "XYZ";
-            //DataHelper.GenerateModelBuilderConfig(dataSet, trainingData,
-            //    labelColumn, trainingTime, trainers);
+        //DataHelper.GenerateModelBuilderConfig(dataSet, trainingData,
+        //    labelColumn, trainingTime, trainers);
         Assert.IsNotNull(config);
         // Save the configuration
         var modelFileName = trainingData
@@ -82,7 +92,8 @@ public class AutomationTests
             $"{modelFileName}.mbconfig");
         File.WriteAllText(configPath, config);
         // Run AutoML
-        RunAutoMLForConfig(AppDomain.CurrentDomain.BaseDirectory,modelFileName);
+        RunAutoMLForConfig(AppDomain.CurrentDomain.BaseDirectory,
+            modelFileName);
         CleanUp();
         var modelPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
             $"{modelFileName}.mlnet");

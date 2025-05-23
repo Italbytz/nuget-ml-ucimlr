@@ -7,14 +7,15 @@ using Italbytz.ML.ModelBuilder.Configuration;
 using Italbytz.ML.Tests.Util.ML;
 using Italbytz.ML.UCIMLR;
 using JetBrains.Annotations;
-using Microsoft.ML;
 
 namespace Italbytz.ML.Tests.Util;
 
 public class DataHelper
 {
-    public static string GenerateModelBuilderConfig(ScenarioType scenario, IDataSource dataSource, 
-        ITrainingOption trainingOption,[CanBeNull] IEnvironment environment = null)
+    public static string GenerateModelBuilderConfig(ScenarioType scenario,
+        IDataSource dataSource,
+        ITrainingOption trainingOption,
+        [CanBeNull] IEnvironment environment = null)
     {
         environment ??= new LocalEnvironmentV1
         {
@@ -28,16 +29,17 @@ public class DataHelper
             Environment = environment,
             TrainingOption = trainingOption
         };
-        return config.SerializeToJson();
+        return config.SerializeToJson(true);
     }
 
-    public static string GenerateModelBuilderConfigForDataset(Dataset dataSet,string trainingFilePath,
-        ScenarioType scenario, 
-        ITrainingOption trainingOption,[CanBeNull] IEnvironment environment = null)
+    public static string GenerateModelBuilderConfigForDataset(Dataset dataSet,
+        string trainingFilePath,
+        ScenarioType scenario,
+        ITrainingOption trainingOption,
+        [CanBeNull] IEnvironment environment = null)
     {
         var options = new JsonSerializerOptions
         {
-            WriteIndented = true,
             Converters =
             {
                 new JsonStringEnumConverter()
@@ -69,14 +71,15 @@ public class DataHelper
             HasHeader = true,
             ColumnProperties = columnProperties
         };
-        return GenerateModelBuilderConfig(scenario, dataSource, trainingOption, environment);
+        return GenerateModelBuilderConfig(scenario, dataSource, trainingOption,
+            environment);
     }
 
     public static string GenerateModelBuilderConfigForDataset(Dataset dataSet,
         string trainingFilePath,
         ScenarioType scenario,
         string labelColumn, int trainingTime,
-        string[] trainers,IValidationOption validationOption,
+        string[] trainers, IValidationOption validationOption,
         [CanBeNull] IEnvironment environment = null)
     {
         var trainingOption = new ClassificationTrainingOptionV2
@@ -86,8 +89,9 @@ public class DataHelper
             LabelColumn = labelColumn,
             AvailableTrainers = trainers,
             ValidationOption = validationOption
-        };   
-        return GenerateModelBuilderConfigForDataset(dataSet, trainingFilePath, scenario, trainingOption, environment);
+        };
+        return GenerateModelBuilderConfigForDataset(dataSet, trainingFilePath,
+            scenario, trainingOption, environment);
     }
 
     /*public static string GenerateModelBuilderConfig(Dataset dataSet,
