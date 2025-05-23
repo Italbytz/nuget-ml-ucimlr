@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Italbytz.ML.Data;
 using Italbytz.ML.ModelBuilder.Configuration;
 using Italbytz.ML.Tests.Util;
 using Italbytz.ML.UCIMLR;
@@ -20,7 +21,7 @@ public class AutomationTests
     }
 
 
-    public Metrics Simulate(Dataset dataset, string labelColumn)
+    public void Simulate(Dataset dataset, string labelColumn)
     {
         var data = UCIMLR.Data.Load(dataset);
         var seeds = new[] { 3, 7, 13, 42, 73, 99, 256, 1024 };
@@ -33,99 +34,88 @@ public class AutomationTests
         foreach (var file in files)
         {
             // Configure
-            var trainingData = Path.Combine(tmpDir, file.TrainFileName);
-            var validationData = Path.Combine(tmpDir, file.ValidateFileName);
-            var testData = Path.Combine(tmpDir, file.TestFileName);
-            var validationOption = new FileValidationOptionV0
-            {
-                FilePath = validationData
-            };
-            var config = DataHelper.GenerateModelBuilderConfigForDataset(
-                dataset, trainingData, ScenarioType.Classification, labelColumn,
-                2,
-                new[] { "LBFGS", "FASTFOREST", "SDCA", "FASTTREE" },
-                validationOption);
-            var configPath = Path.Combine(tmpDir,
-                "config.mbconfig");
-            File.WriteAllText(configPath, config);
+            var configPath = GetConfiguration(tmpDir, file, dataset,
+                labelColumn, ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"]);
             // Run AutoML
             RunAutoMLForConfig(tmpDir, configPath);
             // Validate
-            var modelPath = Path.Combine(tmpDir,
-                "config.mlnet");
-            var mlContext = new MLContext();
+            var metrics = ValidateModel(tmpDir, file, dataset, labelColumn);
+            Assert.IsNotNull(metrics);
+        }
+    }
+
+    private Metrics ValidateModel(string tmpDir,
+        TrainValidateTestFileNames file, Dataset dataset, string labelColumn)
+    {
+        var testData = Path.Combine(tmpDir, file.TestFileName);
+        var modelPath = Path.Combine(tmpDir,
+            "config.mlnet");
+        var mlContext = new MLContext();
+        try
+        {
+            var mlModel = mlContext.Model.Load(modelPath, out _);
+            var testDataView = dataset switch
+            {
+                Dataset.HeartDisease => mlContext.Data
+                    .LoadFromTextFile<HeartDiseaseModelInput>(
+                        testData,
+                        ',', true),
+                Dataset.Iris => mlContext.Data
+                    .LoadFromTextFile<IrisModelInput>(
+                        testData,
+                        ',', true),
+                Dataset.WineQuality => mlContext.Data
+                    .LoadFromTextFile<WineQualityModelInput>(
+                        testData,
+                        ',', true),
+                Dataset.BreastCancerWisconsinDiagnostic => mlContext
+                    .Data
+                    .LoadFromTextFile<
+                        BreastCancerWisconsinDiagnosticModelInput>(
+                        testData,
+                        ',', true),
+                _ => throw new ArgumentOutOfRangeException(nameof(dataset),
+                    dataset,
+                    null)
+            };
+            var testResult = mlModel.Transform(testDataView);
             try
             {
-                var mlModel = mlContext.Model.Load(modelPath, out _);
-                var testDataView = dataset switch
+                var metrics = mlContext.BinaryClassification
+                    .Evaluate(testResult, labelColumn);
+                return new Metrics
                 {
-                    Dataset.HeartDisease => mlContext.Data
-                        .LoadFromTextFile<HeartDiseaseModelInput>(
-                            testData,
-                            ',', true),
-                    Dataset.Iris => mlContext.Data
-                        .LoadFromTextFile<IrisModelInput>(
-                            testData,
-                            ',', true),
-                    Dataset.WineQuality => mlContext.Data
-                        .LoadFromTextFile<WineQualityModelInput>(
-                            testData,
-                            ',', true),
-                    Dataset.BreastCancerWisconsinDiagnostic => mlContext
-                        .Data
-                        .LoadFromTextFile<
-                            BreastCancerWisconsinDiagnosticModelInput>(
-                            testData,
-                            ',', true),
-                    _ => throw new ArgumentOutOfRangeException(nameof(dataset),
-                        dataset,
-                        null)
+                    IsBinaryClassification = true,
+                    Accuracy = metrics.Accuracy,
+                    AreaUnderRocCurve = metrics.AreaUnderRocCurve,
+                    F1Score = metrics.F1Score,
+                    AreaUnderPrecisionRecallCurve =
+                        metrics.AreaUnderPrecisionRecallCurve
                 };
-                var testResult = mlModel.Transform(testDataView);
+            }
+            catch (Exception e1)
+            {
                 try
                 {
-                    var metrics = mlContext.BinaryClassification
+                    var metrics = mlContext.MulticlassClassification
                         .Evaluate(testResult, labelColumn);
                     return new Metrics
                     {
-                        IsBinaryClassification = true,
-                        Accuracy = metrics.Accuracy,
-                        AreaUnderRocCurve = metrics.AreaUnderRocCurve,
-                        F1Score = metrics.F1Score,
-                        AreaUnderPrecisionRecallCurve =
-                            metrics.AreaUnderPrecisionRecallCurve
+                        IsMulticlassClassification = true,
+                        MacroAccuracy = metrics.MacroAccuracy
                     };
                 }
-                catch (Exception e1)
+                catch (Exception e2)
                 {
-                    try
-                    {
-                        var metrics = mlContext.MulticlassClassification
-                            .Evaluate(testResult, labelColumn);
-                        return new Metrics
-                        {
-                            IsMulticlassClassification = true,
-                            MacroAccuracy = metrics.MacroAccuracy
-                        };
-                    }
-                    catch (Exception e2)
-                    {
-                        Console.WriteLine(
-                            $"Neither binary nor multiclass metrics available for {trainingData}.");
-                    }
+                    Console.WriteLine(
+                        $"Neither binary nor multiclass metrics available for {testData}.");
                 }
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(
-                    $"Error loading model for data set {trainingData}.");
-            }
-
-            return new Metrics
-            {
-                MacroAccuracy = 0.0f,
-                Accuracy = 0.0f
-            };
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(
+                $"Error loading model for data set {testData}.");
         }
 
         return new Metrics
@@ -133,6 +123,25 @@ public class AutomationTests
             MacroAccuracy = 0.0f,
             Accuracy = 0.0f
         };
+    }
+
+    private string GetConfiguration(string dir, TrainValidateTestFileNames file,
+        Dataset dataset, string labelColumn, string[] trainers)
+    {
+        var trainingData = Path.Combine(dir, file.TrainFileName);
+        var validationData = Path.Combine(dir, file.ValidateFileName);
+        var validationOption = new FileValidationOptionV0
+        {
+            FilePath = validationData
+        };
+        var config = DataHelper.GenerateModelBuilderConfigForDataset(
+            dataset, trainingData, ScenarioType.Classification, labelColumn,
+            2,
+            trainers,
+            validationOption);
+        var configPath = Path.Combine(dir,
+            "config.mbconfig");
+        File.WriteAllText(configPath, config);
     }
 
     private void RunAutoMLForConfig(string workingDirectory, string configFile)
