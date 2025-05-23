@@ -1,9 +1,8 @@
 using System.IO;
-using Italbytz.ML.UCIMLR;
 using JetBrains.Annotations;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Italbytz.ML.UCIMLR.Tests;
+namespace Italbytz.ML.UCIMLR.Tests.Unit;
 
 [TestClass]
 [TestSubject(typeof(Data))]
