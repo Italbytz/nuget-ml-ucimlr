@@ -20,7 +20,7 @@ public class AutomationTests
     }
 
 
-    public void Simulate(Dataset dataset, string labelColumn)
+    public Metrics Simulate(Dataset dataset, string labelColumn)
     {
         var data = UCIMLR.Data.Load(dataset);
         var seeds = new[] { 3, 7, 13, 42, 73, 99, 256, 1024 };
@@ -32,6 +32,7 @@ public class AutomationTests
         Assert.AreEqual(8, files.Count());
         foreach (var file in files)
         {
+            // Configure
             var trainingData = Path.Combine(tmpDir, file.TrainFileName);
             var validationData = Path.Combine(tmpDir, file.ValidateFileName);
             var testData = Path.Combine(tmpDir, file.TestFileName);
@@ -47,8 +48,91 @@ public class AutomationTests
             var configPath = Path.Combine(tmpDir,
                 "config.mbconfig");
             File.WriteAllText(configPath, config);
+            // Run AutoML
             RunAutoMLForConfig(tmpDir, configPath);
+            // Validate
+            var modelPath = Path.Combine(tmpDir,
+                "config.mlnet");
+            var mlContext = new MLContext();
+            try
+            {
+                var mlModel = mlContext.Model.Load(modelPath, out _);
+                var testDataView = dataset switch
+                {
+                    Dataset.HeartDisease => mlContext.Data
+                        .LoadFromTextFile<HeartDiseaseModelInput>(
+                            testData,
+                            ',', true),
+                    Dataset.Iris => mlContext.Data
+                        .LoadFromTextFile<IrisModelInput>(
+                            testData,
+                            ',', true),
+                    Dataset.WineQuality => mlContext.Data
+                        .LoadFromTextFile<WineQualityModelInput>(
+                            testData,
+                            ',', true),
+                    Dataset.BreastCancerWisconsinDiagnostic => mlContext
+                        .Data
+                        .LoadFromTextFile<
+                            BreastCancerWisconsinDiagnosticModelInput>(
+                            testData,
+                            ',', true),
+                    _ => throw new ArgumentOutOfRangeException(nameof(dataset),
+                        dataset,
+                        null)
+                };
+                var testResult = mlModel.Transform(testDataView);
+                try
+                {
+                    var metrics = mlContext.BinaryClassification
+                        .Evaluate(testResult, labelColumn);
+                    return new Metrics
+                    {
+                        IsBinaryClassification = true,
+                        Accuracy = metrics.Accuracy,
+                        AreaUnderRocCurve = metrics.AreaUnderRocCurve,
+                        F1Score = metrics.F1Score,
+                        AreaUnderPrecisionRecallCurve =
+                            metrics.AreaUnderPrecisionRecallCurve
+                    };
+                }
+                catch (Exception e1)
+                {
+                    try
+                    {
+                        var metrics = mlContext.MulticlassClassification
+                            .Evaluate(testResult, labelColumn);
+                        return new Metrics
+                        {
+                            IsMulticlassClassification = true,
+                            MacroAccuracy = metrics.MacroAccuracy
+                        };
+                    }
+                    catch (Exception e2)
+                    {
+                        Console.WriteLine(
+                            $"Neither binary nor multiclass metrics available for {trainingData}.");
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(
+                    $"Error loading model for data set {trainingData}.");
+            }
+
+            return new Metrics
+            {
+                MacroAccuracy = 0.0f,
+                Accuracy = 0.0f
+            };
         }
+
+        return new Metrics
+        {
+            MacroAccuracy = 0.0f,
+            Accuracy = 0.0f
+        };
     }
 
     private void RunAutoMLForConfig(string workingDirectory, string configFile)
@@ -63,9 +147,8 @@ public class AutomationTests
         mlnet.WaitForExit();
     }
 
-    private void CleanUp()
+    private void CleanUp(string directory)
     {
-        var directory = AppDomain.CurrentDomain.BaseDirectory;
         var projectFiles = Directory.GetFiles(directory, "*.cs");
         foreach (var file in projectFiles) File.Delete(file);
         projectFiles = Directory.GetFiles(directory, "*.csproj");
@@ -94,7 +177,7 @@ public class AutomationTests
         // Run AutoML
         RunAutoMLForConfig(AppDomain.CurrentDomain.BaseDirectory,
             modelFileName);
-        CleanUp();
+        CleanUp(AppDomain.CurrentDomain.BaseDirectory);
         var modelPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
             $"{modelFileName}.mlnet");
         var mlContext = new MLContext();
