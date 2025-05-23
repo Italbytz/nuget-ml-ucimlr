@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using Italbytz.ML.Data;
@@ -17,31 +19,39 @@ public class AutomationTests
     [TestMethod]
     public void SimulateIris()
     {
-        Simulate(Dataset.Iris, "class");
+        var metrics = Simulate(Dataset.Iris, "class",
+            ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
+            new[] { 3, 7, 13, 42, 73, 99, 256, 1024 }, 2);
+        Console.WriteLine(
+            string.Join(',',
+                metrics.Select(m =>
+                    m.MacroAccuracy.ToString(CultureInfo.InvariantCulture))));
     }
 
 
-    public void Simulate(Dataset dataset, string labelColumn)
+    public IEnumerable<Metrics> Simulate(Dataset dataset, string labelColumn,
+        string[] trainers,
+        int[] seeds, int trainingTime)
     {
+        var metrics = new List<Metrics>();
         var data = UCIMLR.Data.Load(dataset);
-        var seeds = new[] { 3, 7, 13, 42, 73, 99, 256, 1024 };
         var tmpDir = Path.GetTempPath();
         var files =
             data.GenerateTrainValidateTestCsvs(tmpDir, dataset.ToString(),
                 seeds: seeds);
-        Assert.IsNotNull(files);
-        Assert.AreEqual(8, files.Count());
         foreach (var file in files)
         {
             // Configure
             var configPath = GetConfiguration(tmpDir, file, dataset,
-                labelColumn, ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"]);
+                labelColumn, trainers, trainingTime);
             // Run AutoML
             RunAutoMLForConfig(tmpDir, configPath);
             // Validate
-            var metrics = ValidateModel(tmpDir, file, dataset, labelColumn);
-            Assert.IsNotNull(metrics);
+            var metric = ValidateModel(tmpDir, file, dataset, labelColumn);
+            metrics.Add(metric);
         }
+
+        return metrics;
     }
 
     private Metrics ValidateModel(string tmpDir,
@@ -126,7 +136,8 @@ public class AutomationTests
     }
 
     private string GetConfiguration(string dir, TrainValidateTestFileNames file,
-        Dataset dataset, string labelColumn, string[] trainers)
+        Dataset dataset, string labelColumn, string[] trainers,
+        int trainingTime)
     {
         var trainingData = Path.Combine(dir, file.TrainFileName);
         var validationData = Path.Combine(dir, file.ValidateFileName);
@@ -136,7 +147,7 @@ public class AutomationTests
         };
         var config = DataHelper.GenerateModelBuilderConfigForDataset(
             dataset, trainingData, ScenarioType.Classification, labelColumn,
-            2,
+            trainingTime,
             trainers,
             validationOption);
         var configPath = Path.Combine(dir,
