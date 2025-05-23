@@ -142,6 +142,7 @@ public class AutomationTests
         var configPath = Path.Combine(dir,
             "config.mbconfig");
         File.WriteAllText(configPath, config);
+        return configPath;
     }
 
     private void RunAutoMLForConfig(string workingDirectory, string configFile)
