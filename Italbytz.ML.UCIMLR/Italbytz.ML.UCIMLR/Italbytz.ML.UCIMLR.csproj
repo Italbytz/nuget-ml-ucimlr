@@ -19,22 +19,23 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.ML" Version="4.0.2" />
+        <PackageReference Include="Italbytz.ML" Version="9.7.4"/>
+        <PackageReference Include="Microsoft.ML" Version="4.0.2"/>
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="Data\Heart_Disease.csv" />
-      <EmbeddedResource Include="Data\Heart_Disease.csv">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </EmbeddedResource>
-      <None Remove="Data\Iris.csv" />
-      <EmbeddedResource Include="Data\Iris.csv">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </EmbeddedResource>
-      <None Remove="Data\Wine_Quality.csv" />
-      <EmbeddedResource Include="Data\Wine_Quality.csv">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </EmbeddedResource>
+        <None Remove="Data\Heart_Disease.csv"/>
+        <EmbeddedResource Include="Data\Heart_Disease.csv">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </EmbeddedResource>
+        <None Remove="Data\Iris.csv"/>
+        <EmbeddedResource Include="Data\Iris.csv">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </EmbeddedResource>
+        <None Remove="Data\Wine_Quality.csv"/>
+        <EmbeddedResource Include="Data\Wine_Quality.csv">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </EmbeddedResource>
     </ItemGroup>
     <ItemGroup>
         <None Include="../../docfx/docs/introduction.md" Pack="true" PackagePath="\"/>

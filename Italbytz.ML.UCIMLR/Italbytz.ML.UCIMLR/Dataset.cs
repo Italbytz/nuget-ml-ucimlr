@@ -1,28 +1,23 @@
+using Italbytz.ML.Data;
+using Microsoft.ML;
+
 namespace Italbytz.ML.UCIMLR;
 
-/// <summary>
-/// Enumeration of available UCI Machine Learning Repository datasets.
-/// </summary>
-public enum Dataset
+public abstract class Dataset : IDataset
 {
-    /// <summary>
-    /// Balance Scale dataset.
-    /// </summary>
-    BalanceScale,
-    /// <summary>
-    /// Heart Disease dataset.
-    /// </summary>
-    HeartDisease,
-    /// <summary>
-    /// Iris dataset.
-    /// </summary>
-    Iris,
-    /// <summary>
-    /// Wine Quality dataset.
-    /// </summary>
-    WineQuality,
-    /// <summary>
-    /// Breast Cancer Wisconsin (Diagnostic) dataset.
-    /// </summary>
-    BreastCancerWisconsinDiagnostic
+    public IDataView DataView { get; }
+
+    public IEnumerable<TrainValidateTestFileNames> GetTrainValidateTestFiles(
+        string saveFolderPath, string filePrefix,
+        string? samplingKeyColumnName = null, double validateFraction = 0.15,
+        double testFraction = 0.15, int[]? seeds = null)
+    {
+        return DataView.GenerateTrainValidateTestCsvs(
+            saveFolderPath, filePrefix, samplingKeyColumnName,
+            validateFraction, testFraction, seeds);
+    }
+
+    protected class IrisModelInput
+    {
+    }
 }

@@ -12,5 +12,5 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.x'
-      - run: cd Italbytz.ML.UCIMLR/Italbytz.ML.UCIMLR.Tests && dotnet test
+      - run: dotnet tool install --global mlnet-linux-x64 && cd Italbytz.ML.UCIMLR/Italbytz.ML.UCIMLR.Tests && dotnet test
 

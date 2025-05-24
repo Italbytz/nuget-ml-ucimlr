@@ -32,7 +32,8 @@ public class DataHelper
         return config.SerializeToJson(true);
     }
 
-    public static string GenerateModelBuilderConfigForDataset(Dataset dataSet,
+    public static string GenerateModelBuilderConfigForDataset(
+        DatasetEnum dataSet,
         string trainingFilePath,
         ScenarioType scenario,
         ITrainingOption trainingOption,
@@ -47,12 +48,13 @@ public class DataHelper
         };
         var jsonColumnProperties = dataSet switch
         {
-            Dataset.BalanceScale => ColumnPropertiesHelper.BalanceScale,
-            Dataset.HeartDisease => ColumnPropertiesHelper.HeartDisease,
-            Dataset.Iris => ColumnPropertiesHelper.Iris,
-            Dataset.WineQuality => ColumnPropertiesHelper.WineQuality,
-            Dataset.BreastCancerWisconsinDiagnostic => ColumnPropertiesHelper
-                .BreastCancerWisconsinDiagnostic,
+            DatasetEnum.BalanceScale => ColumnPropertiesHelper.BalanceScale,
+            DatasetEnum.HeartDisease => ColumnPropertiesHelper.HeartDisease,
+            DatasetEnum.Iris => ColumnPropertiesHelper.Iris,
+            DatasetEnum.WineQuality => ColumnPropertiesHelper.WineQuality,
+            DatasetEnum.BreastCancerWisconsinDiagnostic =>
+                ColumnPropertiesHelper
+                    .BreastCancerWisconsinDiagnostic,
             _ => throw new ArgumentOutOfRangeException(nameof(dataSet), dataSet,
                 null)
         };
@@ -75,7 +77,8 @@ public class DataHelper
             environment);
     }
 
-    public static string GenerateModelBuilderConfigForDataset(Dataset dataSet,
+    public static string GenerateModelBuilderConfigForDataset(
+        DatasetEnum dataSet,
         string trainingFilePath,
         ScenarioType scenario,
         string labelColumn, int trainingTime,
