@@ -18,7 +18,7 @@ public class AutomationTests
     [TestMethod]
     public void SimulateIris()
     {
-        var data = UCIMLR.Data.Iris;
+        var data = Data.Iris;
         var metrics = Simulate(data, "class",
             ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
             new[] { 3, 7, 13, 42, 73, 99, 256, 1024 }, 2);
