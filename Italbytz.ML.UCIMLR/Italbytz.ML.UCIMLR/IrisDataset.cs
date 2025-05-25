@@ -2,6 +2,8 @@ namespace Italbytz.ML.UCIMLR;
 
 public class IrisDataset : Dataset
 {
+    protected override string FilePrefix { get; } = "iris";
+
     protected override string ColumnPropertiesString { get; } = """
         [
           {

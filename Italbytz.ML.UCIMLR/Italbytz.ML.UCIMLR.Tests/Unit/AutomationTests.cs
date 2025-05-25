@@ -43,7 +43,7 @@ public class AutomationTests
 
         var tmpDir = Path.GetTempPath();
         var files =
-            dataset.GetTrainValidateTestFiles(tmpDir, datasetEnum.ToString(),
+            dataset.GetTrainValidateTestFiles(tmpDir,
                 seeds: seeds);
         foreach (var file in files)
         {

@@ -11,6 +11,7 @@ public abstract class Dataset : IDataset
     private IColumnProperties[]? _columnProperties;
 
     protected virtual string ColumnPropertiesString { get; }
+    protected virtual string FilePrefix { get; }
 
     public IColumnProperties[] ColumnProperties =>
         _columnProperties ??= GetColumnProperties();
@@ -18,12 +19,12 @@ public abstract class Dataset : IDataset
     public IDataView DataView { get; }
 
     public IEnumerable<TrainValidateTestFileNames> GetTrainValidateTestFiles(
-        string saveFolderPath, string filePrefix,
+        string saveFolderPath,
         string? samplingKeyColumnName = null, double validateFraction = 0.15,
         double testFraction = 0.15, int[]? seeds = null)
     {
         return DataView.GenerateTrainValidateTestCsvs(
-            saveFolderPath, filePrefix, samplingKeyColumnName,
+            saveFolderPath, FilePrefix, samplingKeyColumnName,
             validateFraction, testFraction, seeds);
     }
 
