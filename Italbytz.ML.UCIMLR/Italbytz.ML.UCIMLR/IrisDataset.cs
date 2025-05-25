@@ -1,7 +1,12 @@
+using Microsoft.ML;
+
 namespace Italbytz.ML.UCIMLR;
 
 public class IrisDataset : Dataset
 {
+    protected override string ResourceName { get; } =
+        "Italbytz.ML.UCIMLR.Data.Iris.csv";
+
     protected override string FilePrefix { get; } = "iris";
 
     protected override string ColumnPropertiesString { get; } = """
@@ -48,4 +53,15 @@ public class IrisDataset : Dataset
           }
         ]
         """;
+
+    protected override IDataView? LoadFromTextFile(string tempFile)
+    {
+        var mlContext = new MLContext();
+
+        // Load the dataset from the temporary file
+        var data = mlContext.Data.LoadFromTextFile<IrisModelInput>(
+            tempFile, ',', true);
+
+        return data;
+    }
 }

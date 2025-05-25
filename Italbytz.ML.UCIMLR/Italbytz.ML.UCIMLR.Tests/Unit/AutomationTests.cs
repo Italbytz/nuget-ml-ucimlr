@@ -48,7 +48,7 @@ public class AutomationTests
         foreach (var file in files)
         {
             // Configure
-            var configPath = GetConfiguration(tmpDir, file, datasetEnum,
+            var configPath = GetConfiguration(tmpDir, file, dataset,
                 labelColumn, trainers, trainingTime);
             // Run AutoML
             RunAutoMLForConfig(tmpDir, configPath);
@@ -143,7 +143,7 @@ public class AutomationTests
     }
 
     private string GetConfiguration(string dir, TrainValidateTestFileNames file,
-        DatasetEnum datasetEnum, string labelColumn, string[] trainers,
+        IDataset dataset, string labelColumn, string[] trainers,
         int trainingTime)
     {
         var trainingData = Path.Combine(dir, file.TrainFileName);
@@ -153,7 +153,7 @@ public class AutomationTests
             FilePath = validationData
         };
         var config = DataHelper.GenerateModelBuilderConfigForDataset(
-            datasetEnum, trainingData, ScenarioType.Classification, labelColumn,
+            dataset, trainingData, ScenarioType.Classification, labelColumn,
             trainingTime,
             trainers,
             validationOption);

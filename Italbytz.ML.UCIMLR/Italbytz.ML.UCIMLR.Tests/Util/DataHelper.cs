@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Italbytz.ML.ModelBuilder.Configuration;
-using Italbytz.ML.Tests.Util.ML;
 using Italbytz.ML.UCIMLR;
 using JetBrains.Annotations;
 
@@ -33,35 +30,14 @@ public class DataHelper
     }
 
     public static string GenerateModelBuilderConfigForDataset(
-        DatasetEnum dataSet,
+        IDataset dataSet,
         string trainingFilePath,
         ScenarioType scenario,
         ITrainingOption trainingOption,
         [CanBeNull] IEnvironment environment = null)
     {
-        var options = new JsonSerializerOptions
-        {
-            Converters =
-            {
-                new JsonStringEnumConverter()
-            }
-        };
-        var jsonColumnProperties = dataSet switch
-        {
-            DatasetEnum.BalanceScale => ColumnPropertiesHelper.BalanceScale,
-            DatasetEnum.HeartDisease => ColumnPropertiesHelper.HeartDisease,
-            DatasetEnum.Iris => ColumnPropertiesHelper.Iris,
-            DatasetEnum.WineQuality => ColumnPropertiesHelper.WineQuality,
-            DatasetEnum.BreastCancerWisconsinDiagnostic =>
-                ColumnPropertiesHelper
-                    .BreastCancerWisconsinDiagnostic,
-            _ => throw new ArgumentOutOfRangeException(nameof(dataSet), dataSet,
-                null)
-        };
-
         var columnProperties =
-            JsonSerializer.Deserialize<ColumnPropertiesV5[]>(
-                jsonColumnProperties, options);
+            dataSet.ColumnProperties;
         var dataSource = new TabularFileDataSourceV3
         {
             EscapeCharacter = '\\',
@@ -78,7 +54,7 @@ public class DataHelper
     }
 
     public static string GenerateModelBuilderConfigForDataset(
-        DatasetEnum dataSet,
+        IDataset dataSet,
         string trainingFilePath,
         ScenarioType scenario,
         string labelColumn, int trainingTime,
