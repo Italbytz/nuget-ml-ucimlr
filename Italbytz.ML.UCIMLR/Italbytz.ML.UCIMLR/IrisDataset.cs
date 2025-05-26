@@ -1,3 +1,4 @@
+using Italbytz.ML.ModelBuilder.Configuration;
 using Microsoft.ML;
 
 namespace Italbytz.ML.UCIMLR;
@@ -8,6 +9,8 @@ public class IrisDataset : Dataset
         "Italbytz.ML.UCIMLR.Data.Iris.csv";
 
     protected override string FilePrefix { get; } = "iris";
+
+    public override string? LabelColumnName { get; } = @"class";
 
     protected override string ColumnPropertiesString { get; } = """
         [
@@ -53,6 +56,36 @@ public class IrisDataset : Dataset
           }
         ]
         """;
+
+    public override IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
+        ScenarioType scenarioType, IEstimator<ITransformer> trainer)
+    {
+        if (scenarioType == ScenarioType.Classification)
+        {
+            var pipeline = mlContext.Transforms.ReplaceMissingValues(new[]
+                {
+                    new InputOutputColumnPair(@"sepal length", @"sepal length"),
+                    new InputOutputColumnPair(@"sepal width", @"sepal width"),
+                    new InputOutputColumnPair(@"petal length", @"petal length"),
+                    new InputOutputColumnPair(@"petal width", @"petal width")
+                })
+                .Append(mlContext.Transforms.Concatenate(@"Features",
+                    @"sepal length", @"sepal width", @"petal length",
+                    @"petal width"))
+                .Append(mlContext.Transforms.Conversion.MapValueToKey(@"class",
+                    @"class", addKeyValueAnnotationsAsText: false))
+                .Append(
+                    trainer)
+                .Append(
+                    mlContext.Transforms.Conversion.MapKeyToValue(
+                        @"PredictedLabel", @"PredictedLabel"));
+
+            return pipeline;
+        }
+
+        throw new NotSupportedException(
+            $"The scenario type {scenarioType} is not supported.");
+    }
 
     protected override IDataView? LoadFromTextFile(string tempFile)
     {

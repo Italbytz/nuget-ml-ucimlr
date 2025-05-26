@@ -21,6 +21,7 @@ public abstract class Dataset : IDataset
     public IColumnProperties[] ColumnProperties =>
         _columnProperties ??= GetColumnProperties();
 
+    public virtual string? LabelColumnName { get; }
     public IDataView DataView => _dataView ??= LoadDataView();
 
     public IEnumerable<TrainValidateTestFileNames> GetTrainValidateTestFiles(
@@ -32,6 +33,9 @@ public abstract class Dataset : IDataset
             saveFolderPath, FilePrefix, samplingKeyColumnName,
             validateFraction, testFraction, seeds);
     }
+
+    public abstract IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
+        ScenarioType scenarioType, IEstimator<ITransformer> estimator);
 
     private IDataView? LoadDataView()
     {

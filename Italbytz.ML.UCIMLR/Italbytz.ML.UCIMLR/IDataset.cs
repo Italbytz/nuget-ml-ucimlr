@@ -6,6 +6,7 @@ namespace Italbytz.ML.UCIMLR;
 
 public interface IDataset
 {
+    public string? LabelColumnName { get; }
     public IDataView DataView { get; }
 
     public IColumnProperties[] ColumnProperties { get; }
@@ -17,4 +18,7 @@ public interface IDataset
         double testFraction = 0.15,
         int[]? seeds = null
     );
+
+    public IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
+        ScenarioType scenarioType, IEstimator<ITransformer> estimator);
 }
