@@ -21,7 +21,7 @@ public class AutomationTests
         var data = Data.Iris;
         var metrics = Simulate(data, "class",
             ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
-            new[] { 3, 7, 13, 42, 73, 99, 256, 1024 }, 2);
+            [3, 7, 13, 42, 73, 99, 256, 1024], 2);
         Console.WriteLine(
             string.Join(',',
                 metrics.Select(m =>
