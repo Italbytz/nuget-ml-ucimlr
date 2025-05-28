@@ -22,6 +22,14 @@ public interface IDataset
     public IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
         ScenarioType scenarioType, IEstimator<ITransformer> estimator);
 
+    protected IDataView LoadFromTextFile<TModelInput>(
+        string path,
+        char separatorChar = TextLoaderDefaults.Separator,
+        bool hasHeader = TextLoaderDefaults.HasHeader,
+        bool allowQuoting = TextLoaderDefaults.AllowQuoting,
+        bool trimWhitespace = TextLoaderDefaults.TrimWhitespace,
+        bool allowSparse = TextLoaderDefaults.AllowSparse);
+
     public IDataView LoadFromTextFile(
         string path,
         char separatorChar = TextLoaderDefaults.Separator,

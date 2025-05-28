@@ -19,7 +19,20 @@ public class AutomationTests
     public void SimulateIris()
     {
         var data = Data.Iris;
-        var metrics = Simulate(data, "class",
+        var metrics = Simulate(data,
+            ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
+            [3, 7, 13, 42, 73, 99, 256, 1024], 2);
+        Console.WriteLine(
+            string.Join(',',
+                metrics.Select(m =>
+                    m.MacroAccuracy.ToString(CultureInfo.InvariantCulture))));
+    }
+
+    [TestMethod]
+    public void SimulateBreastCancerWisconsinDiagnostic()
+    {
+        var data = Data.BreastCancerWisconsinDiagnostic;
+        var metrics = Simulate(data,
             ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
             [3, 7, 13, 42, 73, 99, 256, 1024], 2);
         Console.WriteLine(
@@ -30,7 +43,6 @@ public class AutomationTests
 
 
     public IEnumerable<Metrics> Simulate(IDataset dataset,
-        string labelColumn,
         string[] trainers,
         int[] seeds, int trainingTime)
     {
@@ -44,11 +56,11 @@ public class AutomationTests
         {
             // Configure
             var configPath = GetConfiguration(tmpDir, file, dataset,
-                labelColumn, trainers, trainingTime);
+                trainers, trainingTime);
             // Run AutoML
             RunAutoMLForConfig(tmpDir, configPath);
             // Validate
-            var metric = ValidateModel(tmpDir, file, dataset, labelColumn);
+            var metric = ValidateModel(tmpDir, file, dataset);
             metrics.Add(metric);
         }
 
@@ -56,8 +68,7 @@ public class AutomationTests
     }
 
     private Metrics ValidateModel(string tmpDir,
-        TrainValidateTestFileNames file, IDataset dataset,
-        string labelColumn)
+        TrainValidateTestFileNames file, IDataset dataset)
     {
         var testData = Path.Combine(tmpDir, file.TestFileName);
         var modelPath = Path.Combine(tmpDir,
@@ -73,7 +84,7 @@ public class AutomationTests
             try
             {
                 var metrics = mlContext.BinaryClassification
-                    .Evaluate(testResult, labelColumn);
+                    .Evaluate(testResult, dataset.LabelColumnName);
                 return new Metrics
                 {
                     IsBinaryClassification = true,
@@ -89,7 +100,7 @@ public class AutomationTests
                 try
                 {
                     var metrics = mlContext.MulticlassClassification
-                        .Evaluate(testResult, labelColumn);
+                        .Evaluate(testResult, dataset.LabelColumnName);
                     return new Metrics
                     {
                         IsMulticlassClassification = true,
@@ -117,7 +128,7 @@ public class AutomationTests
     }
 
     private string GetConfiguration(string dir, TrainValidateTestFileNames file,
-        IDataset dataset, string labelColumn, string[] trainers,
+        IDataset dataset, string[] trainers,
         int trainingTime)
     {
         var trainingData = Path.Combine(dir, file.TrainFileName);
@@ -127,7 +138,8 @@ public class AutomationTests
             FilePath = validationData
         };
         var config = DataHelper.GenerateModelBuilderConfigForDataset(
-            dataset, trainingData, ScenarioType.Classification, labelColumn,
+            dataset, trainingData, ScenarioType.Classification,
+            dataset.LabelColumnName,
             trainingTime,
             trainers,
             validationOption);

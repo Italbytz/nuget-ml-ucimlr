@@ -4,7 +4,8 @@ using Microsoft.ML.Data;
 
 namespace Italbytz.ML.UCIMLR;
 
-public class WineQualityDataset : Dataset
+public class
+    WineQualityDataset : Dataset<WineQualityDataset.WineQualityModelInput>
 {
     public override IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
         ScenarioType scenarioType,
@@ -20,10 +21,12 @@ public class WineQualityDataset : Dataset
         bool trimWhitespace = IDataset.TextLoaderDefaults.TrimWhitespace,
         bool allowSparse = IDataset.TextLoaderDefaults.AllowSparse)
     {
-        throw new NotImplementedException();
+        return LoadFromTextFile<WineQualityModelInput>(path, separatorChar,
+            hasHeader,
+            allowQuoting, trimWhitespace, allowSparse);
     }
 
-    private class WineQualityModelInput
+    public class WineQualityModelInput
     {
         [LoadColumn(0)]
         [ColumnName(@"fixed_acidity")]

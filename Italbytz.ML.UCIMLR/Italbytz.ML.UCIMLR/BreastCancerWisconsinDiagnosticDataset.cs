@@ -4,13 +4,331 @@ using Microsoft.ML.Data;
 
 namespace Italbytz.ML.UCIMLR;
 
-public class BreastCancerWisconsinDiagnosticDataset : Dataset
+public class BreastCancerWisconsinDiagnosticDataset : Dataset<
+    BreastCancerWisconsinDiagnosticDataset.
+    BreastCancerWisconsinDiagnosticModelInput>
 {
+    protected override string ResourceName { get; } =
+        "Italbytz.ML.UCIMLR.Data.Breast_Cancer_Wisconsin_Diagnostic_.csv";
+
+    protected override string FilePrefix { get; } = "bcwd";
+
+    public override string? LabelColumnName { get; } = @"Diagnosis";
+
+    protected override string ColumnPropertiesString { get; } = """
+        [
+          {
+            "ColumnName": "radius1",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "texture1",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "perimeter1",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "area1",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "smoothness1",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "compactness1",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "concavity1",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "concave_points1",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "symmetry1",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "fractal_dimension1",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "radius2",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "texture2",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "perimeter2",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "area2",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "smoothness2",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "compactness2",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "concavity2",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "concave_points2",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "symmetry2",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "fractal_dimension2",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "radius3",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "texture3",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "perimeter3",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "area3",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "smoothness3",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "compactness3",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "concavity3",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "concave_points3",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "symmetry3",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "fractal_dimension3",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "Diagnosis",
+            "ColumnPurpose": "Label",
+            "ColumnDataFormat": "String",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          }
+        ]
+        """;
+
+
     public override IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
         ScenarioType scenarioType,
         IEstimator<ITransformer> estimator)
     {
-        throw new NotImplementedException();
+        var pipeline = mlContext.Transforms.ReplaceMissingValues(new[]
+            {
+                new InputOutputColumnPair(@"radius1", @"radius1"),
+                new InputOutputColumnPair(@"texture1", @"texture1"),
+                new InputOutputColumnPair(@"perimeter1", @"perimeter1"),
+                new InputOutputColumnPair(@"area1", @"area1"),
+                new InputOutputColumnPair(@"smoothness1", @"smoothness1"),
+                new InputOutputColumnPair(@"compactness1", @"compactness1"),
+                new InputOutputColumnPair(@"concavity1", @"concavity1"),
+                new InputOutputColumnPair(@"concave_points1",
+                    @"concave_points1"),
+                new InputOutputColumnPair(@"symmetry1", @"symmetry1"),
+                new InputOutputColumnPair(@"fractal_dimension1",
+                    @"fractal_dimension1"),
+                new InputOutputColumnPair(@"radius2", @"radius2"),
+                new InputOutputColumnPair(@"texture2", @"texture2"),
+                new InputOutputColumnPair(@"perimeter2", @"perimeter2"),
+                new InputOutputColumnPair(@"area2", @"area2"),
+                new InputOutputColumnPair(@"smoothness2", @"smoothness2"),
+                new InputOutputColumnPair(@"compactness2", @"compactness2"),
+                new InputOutputColumnPair(@"concavity2", @"concavity2"),
+                new InputOutputColumnPair(@"concave_points2",
+                    @"concave_points2"),
+                new InputOutputColumnPair(@"symmetry2", @"symmetry2"),
+                new InputOutputColumnPair(@"fractal_dimension2",
+                    @"fractal_dimension2"),
+                new InputOutputColumnPair(@"radius3", @"radius3"),
+                new InputOutputColumnPair(@"texture3", @"texture3"),
+                new InputOutputColumnPair(@"perimeter3", @"perimeter3"),
+                new InputOutputColumnPair(@"area3", @"area3"),
+                new InputOutputColumnPair(@"smoothness3", @"smoothness3"),
+                new InputOutputColumnPair(@"compactness3", @"compactness3"),
+                new InputOutputColumnPair(@"concavity3", @"concavity3"),
+                new InputOutputColumnPair(@"concave_points3",
+                    @"concave_points3"),
+                new InputOutputColumnPair(@"symmetry3", @"symmetry3"),
+                new InputOutputColumnPair(@"fractal_dimension3",
+                    @"fractal_dimension3")
+            })
+            .Append(mlContext.Transforms.Concatenate(@"Features", @"radius1",
+                @"texture1", @"perimeter1", @"area1", @"smoothness1",
+                @"compactness1", @"concavity1", @"concave_points1",
+                @"symmetry1", @"fractal_dimension1", @"radius2", @"texture2",
+                @"perimeter2", @"area2", @"smoothness2", @"compactness2",
+                @"concavity2", @"concave_points2", @"symmetry2",
+                @"fractal_dimension2", @"radius3", @"texture3", @"perimeter3",
+                @"area3", @"smoothness3", @"compactness3", @"concavity3",
+                @"concave_points3", @"symmetry3", @"fractal_dimension3"))
+            .Append(mlContext.Transforms.Conversion.MapValueToKey(@"Diagnosis",
+                @"Diagnosis", addKeyValueAnnotationsAsText: false))
+            .Append(estimator)
+            .Append(
+                mlContext.Transforms.Conversion.MapKeyToValue(@"PredictedLabel",
+                    @"PredictedLabel"));
+
+        return pipeline;
     }
 
     public override IDataView LoadFromTextFile(string path,
@@ -20,10 +338,13 @@ public class BreastCancerWisconsinDiagnosticDataset : Dataset
         bool trimWhitespace = IDataset.TextLoaderDefaults.TrimWhitespace,
         bool allowSparse = IDataset.TextLoaderDefaults.AllowSparse)
     {
-        throw new NotImplementedException();
+        return LoadFromTextFile<BreastCancerWisconsinDiagnosticModelInput>(path,
+            separatorChar,
+            hasHeader,
+            allowQuoting, trimWhitespace, allowSparse);
     }
 
-    private class BreastCancerWisconsinDiagnosticModelInput
+    public class BreastCancerWisconsinDiagnosticModelInput
     {
         [LoadColumn(0)]
         [ColumnName(@"radius1")]

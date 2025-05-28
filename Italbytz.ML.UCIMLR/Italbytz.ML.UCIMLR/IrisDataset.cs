@@ -4,7 +4,7 @@ using Microsoft.ML.Data;
 
 namespace Italbytz.ML.UCIMLR;
 
-public class IrisDataset : Dataset
+public class IrisDataset : Dataset<IrisDataset.IrisModelInput>
 {
     protected override string ResourceName { get; } =
         "Italbytz.ML.UCIMLR.Data.Iris.csv";
@@ -95,19 +95,15 @@ public class IrisDataset : Dataset
         bool trimWhitespace = IDataset.TextLoaderDefaults.TrimWhitespace,
         bool allowSparse = IDataset.TextLoaderDefaults.AllowSparse)
     {
-        var mlContext = new MLContext();
-        // Load the dataset from the specified path
-        var data = mlContext.Data.LoadFromTextFile<IrisModelInput>(
-            path, separatorChar, hasHeader, allowQuoting, trimWhitespace,
-            allowSparse);
-        return data;
+        return LoadFromTextFile<IrisModelInput>(path, separatorChar, hasHeader,
+            allowQuoting, trimWhitespace, allowSparse);
     }
 
     /// <summary>
     ///     Represents the input data schema for the Iris dataset used in ML.NET
     ///     models.
     /// </summary>
-    private class IrisModelInput
+    public class IrisModelInput
     {
         [LoadColumn(0)]
         [ColumnName(@"sepal length")]

@@ -4,7 +4,8 @@ using Microsoft.ML.Data;
 
 namespace Italbytz.ML.UCIMLR;
 
-public class HeartDiseaseDataset : Dataset
+public class
+    HeartDiseaseDataset : Dataset<HeartDiseaseDataset.HeartDiseaseModelInput>
 {
     public override IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
         ScenarioType scenarioType,
@@ -20,10 +21,13 @@ public class HeartDiseaseDataset : Dataset
         bool trimWhitespace = IDataset.TextLoaderDefaults.TrimWhitespace,
         bool allowSparse = IDataset.TextLoaderDefaults.AllowSparse)
     {
-        throw new NotImplementedException();
+        return LoadFromTextFile<HeartDiseaseModelInput>(path, separatorChar,
+            hasHeader,
+            allowQuoting, trimWhitespace, allowSparse);
     }
 
-    private class HeartDiseaseModelInput
+
+    public class HeartDiseaseModelInput
     {
         [LoadColumn(0)] [ColumnName(@"age")] public float Age { get; set; }
 
