@@ -1,10 +1,11 @@
-using System;
+using System.Collections.Generic;
+using System.Reflection;
 using Italbytz.ML.ModelBuilder.Configuration;
+using Italbytz.ML.UCIMLR.Trainers;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
 using Microsoft.ML.Trainers.FastTree;
-using Microsoft.ML.Transforms;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Italbytz.ML.UCIMLR.Tests.Unit;
@@ -140,15 +141,83 @@ public class EvaluationTests
         var pipeline = data.BuildPipeline(mlContext,
             ScenarioType.Classification, trainer);
         var model = pipeline.Fit(data.DataView);
-        Explain(model);
+        var modelParams = model.ExtractModel();
+        var allParams = RetrieveModelParameters(model);
+
         var predictions = model.Transform(data.DataView);
         return mlContext.MulticlassClassification.Evaluate(predictions,
             data.LabelColumnName);
     }
 
-    private void Explain(ITransformer model)
+    private IEnumerable<ICanSaveModel> RetrieveModelParameters(
+        ICanSaveModel transformer)
     {
-        if (model is TransformerChain<KeyToValueMappingTransformer> chain)
+        var modelParameters = new List<ICanSaveModel>();
+        if (transformer is IEnumerable<ITransformer> chain)
+        {
+            foreach (var chainItem in chain)
+                modelParameters.AddRange(RetrieveModelParameters(chainItem));
+        }
+        else if (transformer is IPredictionTransformer<ICanSaveModel>
+                 predictionTransformer)
+        {
+            var model = predictionTransformer.Model;
+            modelParameters.Add(model);
+
+            if (model is OneVersusAllModelParameters
+                oneVersusAllModelParameters)
+                modelParameters.Add(oneVersusAllModelParameters.ToPublic());
+
+            var subModelParamsProp = model?.GetType()
+                .GetProperty("SubModelParameters",
+                    BindingFlags.Instance | BindingFlags.NonPublic |
+                    BindingFlags.Public);
+            if (subModelParamsProp != null)
+            {
+                var subModelParams =
+                    subModelParamsProp.GetValue(model) as IEnumerable<object>;
+                if (subModelParams != null)
+                    foreach (var subModel in subModelParams)
+                    {
+                        modelParameters.Add(subModel as ICanSaveModel);
+                        modelParameters.AddRange(
+                            RetrieveModelParameters(subModel as ICanSaveModel));
+                    }
+            }
+        }
+
+        return modelParameters;
+    }
+
+    private void ExplainOld(ITransformer transformer)
+    {
+        if (transformer is not IEnumerable<ITransformer> chain) return;
+        foreach (var predictionTransformerCandidate in chain)
+            if (predictionTransformerCandidate is
+                IPredictionTransformer<ICanSaveModel>)
+                transformer = predictionTransformerCandidate;
+        if (transformer is not IPredictionTransformer<ICanSaveModel>
+            predictionTransformer) return;
+        var model = predictionTransformer.Model;
+
+        // Zugriff auf die interne Property "SubModelParameters" per Reflection
+        var subModelParamsProp = model?.GetType()
+            .GetProperty("SubModelParameters",
+                BindingFlags.Instance | BindingFlags.NonPublic |
+                BindingFlags.Public);
+        if (subModelParamsProp != null)
+        {
+            var subModelParams =
+                subModelParamsProp.GetValue(model) as IEnumerable<object>;
+            if (subModelParams != null)
+                foreach (var subModel in subModelParams)
+                {
+                    // Hier kann weitere Verarbeitung erfolgen, z\.B\. Logging oder Analyse
+                }
+        }
+
+
+        /*if (model is TransformerChain<KeyToValueMappingTransformer> chain)
         {
             foreach (var transformer in chain)
             {
@@ -158,12 +227,12 @@ public class EvaluationTests
                     var ovaModel = ova.Model;
                     foreach (var submodel in ovaModel.SubModelParameters)
                     {
-                        
+
                     }
-                    
+
                 }
             }
             return;
-        }
+        }*/
     }
 }
