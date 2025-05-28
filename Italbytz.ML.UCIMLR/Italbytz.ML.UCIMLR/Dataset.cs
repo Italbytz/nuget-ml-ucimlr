@@ -3,7 +3,6 @@ using System.Text.Json.Serialization;
 using Italbytz.ML.Data;
 using Italbytz.ML.ModelBuilder.Configuration;
 using Microsoft.ML;
-using Microsoft.ML.Data;
 
 namespace Italbytz.ML.UCIMLR;
 
@@ -37,6 +36,13 @@ public abstract class Dataset : IDataset
     public abstract IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
         ScenarioType scenarioType, IEstimator<ITransformer> estimator);
 
+    public abstract IDataView LoadFromTextFile(string path,
+        char separatorChar = IDataset.TextLoaderDefaults.Separator,
+        bool hasHeader = IDataset.TextLoaderDefaults.HasHeader,
+        bool allowQuoting = IDataset.TextLoaderDefaults.AllowQuoting,
+        bool trimWhitespace = IDataset.TextLoaderDefaults.TrimWhitespace,
+        bool allowSparse = IDataset.TextLoaderDefaults.AllowSparse);
+
     private IDataView? LoadDataView()
     {
         var stream = GetStream();
@@ -45,16 +51,14 @@ public abstract class Dataset : IDataset
         stream?.CopyTo(fileStream);
         fileStream.Flush();
         fileStream.Close();
-        var data = LoadFromTextFile(tempFile);
+        var data = LoadFromTextFile(tempFile, ',', true);
         return data ??
                throw new InvalidOperationException("Failed to load data");
     }
 
-    protected abstract IDataView? LoadFromTextFile(string tempFile);
-
     private Stream GetStream()
     {
-        var assembly = typeof(StaticData).Assembly;
+        var assembly = typeof(Dataset).Assembly;
         var stream = assembly.GetManifestResourceStream(ResourceName);
         return stream;
     }
@@ -72,31 +76,5 @@ public abstract class Dataset : IDataset
         return
             JsonSerializer.Deserialize<ColumnPropertiesV5[]>(
                 ColumnPropertiesString, options);
-    }
-
-
-    /// <summary>
-    ///     Represents the input data schema for the Iris dataset used in ML.NET
-    ///     models.
-    /// </summary>
-    protected class IrisModelInput
-    {
-        [LoadColumn(0)]
-        [ColumnName(@"sepal length")]
-        public float Sepal_length { get; set; }
-
-        [LoadColumn(1)]
-        [ColumnName(@"sepal width")]
-        public float Sepal_width { get; set; }
-
-        [LoadColumn(2)]
-        [ColumnName(@"petal length")]
-        public float Petal_length { get; set; }
-
-        [LoadColumn(3)]
-        [ColumnName(@"petal width")]
-        public float Petal_width { get; set; }
-
-        [LoadColumn(4)] [ColumnName(@"class")] public string Class { get; set; }
     }
 }

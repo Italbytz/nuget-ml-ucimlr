@@ -36,11 +36,6 @@ public class AutomationTests
     {
         var metrics = new List<Metrics>();
 
-        // ToDo: Refactor
-        var datasetEnum = DatasetEnum.WineQuality;
-        if (dataset is IrisDataset)
-            datasetEnum = DatasetEnum.Iris;
-
         var tmpDir = Path.GetTempPath();
         var files =
             dataset.GetTrainValidateTestFiles(tmpDir,
@@ -53,7 +48,7 @@ public class AutomationTests
             // Run AutoML
             RunAutoMLForConfig(tmpDir, configPath);
             // Validate
-            var metric = ValidateModel(tmpDir, file, datasetEnum, labelColumn);
+            var metric = ValidateModel(tmpDir, file, dataset, labelColumn);
             metrics.Add(metric);
         }
 
@@ -61,7 +56,7 @@ public class AutomationTests
     }
 
     private Metrics ValidateModel(string tmpDir,
-        TrainValidateTestFileNames file, DatasetEnum datasetEnum,
+        TrainValidateTestFileNames file, IDataset dataset,
         string labelColumn)
     {
         var testData = Path.Combine(tmpDir, file.TestFileName);
@@ -71,30 +66,9 @@ public class AutomationTests
         try
         {
             var mlModel = mlContext.Model.Load(modelPath, out _);
-            var testDataView = datasetEnum switch
-            {
-                DatasetEnum.HeartDisease => mlContext.Data
-                    .LoadFromTextFile<HeartDiseaseModelInput>(
-                        testData,
-                        ',', true),
-                DatasetEnum.Iris => mlContext.Data
-                    .LoadFromTextFile<IrisModelInput>(
-                        testData,
-                        ',', true),
-                DatasetEnum.WineQuality => mlContext.Data
-                    .LoadFromTextFile<WineQualityModelInput>(
-                        testData,
-                        ',', true),
-                DatasetEnum.BreastCancerWisconsinDiagnostic => mlContext
-                    .Data
-                    .LoadFromTextFile<
-                        BreastCancerWisconsinDiagnosticModelInput>(
-                        testData,
-                        ',', true),
-                _ => throw new ArgumentOutOfRangeException(nameof(datasetEnum),
-                    datasetEnum,
-                    null)
-            };
+            var testDataView = dataset.LoadFromTextFile(testData,
+                ',', true);
+
             var testResult = mlModel.Transform(testDataView);
             try
             {

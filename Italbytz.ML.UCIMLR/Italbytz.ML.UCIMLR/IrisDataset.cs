@@ -1,5 +1,6 @@
 using Italbytz.ML.ModelBuilder.Configuration;
 using Microsoft.ML;
+using Microsoft.ML.Data;
 
 namespace Italbytz.ML.UCIMLR;
 
@@ -87,14 +88,43 @@ public class IrisDataset : Dataset
             $"The scenario type {scenarioType} is not supported.");
     }
 
-    protected override IDataView? LoadFromTextFile(string tempFile)
+    public override IDataView LoadFromTextFile(string path,
+        char separatorChar = IDataset.TextLoaderDefaults.Separator,
+        bool hasHeader = IDataset.TextLoaderDefaults.HasHeader,
+        bool allowQuoting = IDataset.TextLoaderDefaults.AllowQuoting,
+        bool trimWhitespace = IDataset.TextLoaderDefaults.TrimWhitespace,
+        bool allowSparse = IDataset.TextLoaderDefaults.AllowSparse)
     {
         var mlContext = new MLContext();
-
-        // Load the dataset from the temporary file
+        // Load the dataset from the specified path
         var data = mlContext.Data.LoadFromTextFile<IrisModelInput>(
-            tempFile, ',', true);
-
+            path, separatorChar, hasHeader, allowQuoting, trimWhitespace,
+            allowSparse);
         return data;
+    }
+
+    /// <summary>
+    ///     Represents the input data schema for the Iris dataset used in ML.NET
+    ///     models.
+    /// </summary>
+    private class IrisModelInput
+    {
+        [LoadColumn(0)]
+        [ColumnName(@"sepal length")]
+        public float Sepal_length { get; set; }
+
+        [LoadColumn(1)]
+        [ColumnName(@"sepal width")]
+        public float Sepal_width { get; set; }
+
+        [LoadColumn(2)]
+        [ColumnName(@"petal length")]
+        public float Petal_length { get; set; }
+
+        [LoadColumn(3)]
+        [ColumnName(@"petal width")]
+        public float Petal_width { get; set; }
+
+        [LoadColumn(4)] [ColumnName(@"class")] public string Class { get; set; }
     }
 }

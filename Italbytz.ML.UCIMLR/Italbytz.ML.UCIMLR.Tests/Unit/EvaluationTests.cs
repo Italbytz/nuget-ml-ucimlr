@@ -33,7 +33,22 @@ public class EvaluationTests
     }
 
     [TestMethod]
-    public void EvaluateIrisLbgfs()
+    public void EvaluateIrisLbgfsMaximumEntrop()
+    {
+        var data = Data.Iris;
+        var mlContext = ThreadSafeMLContext.LocalMLContext;
+        var trainer =
+            mlContext.MulticlassClassification.Trainers.LbfgsMaximumEntropy(
+                new LbfgsMaximumEntropyMulticlassTrainer.Options
+                {
+                    L1Regularization = 1F, L2Regularization = 1F,
+                    LabelColumnName = @"class", FeatureColumnName = @"Features"
+                });
+        var metrics = Evaluate(data, trainer);
+    }
+
+    [TestMethod]
+    public void EvaluateIrisLbgfsMaximumEntropy()
     {
         var data = Data.Iris;
         var mlContext = ThreadSafeMLContext.LocalMLContext;
