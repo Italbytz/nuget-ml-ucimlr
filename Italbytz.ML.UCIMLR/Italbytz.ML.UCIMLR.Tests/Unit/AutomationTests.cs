@@ -15,17 +15,70 @@ namespace Italbytz.ML.UCIMLR.Tests.Unit;
 [TestClass]
 public class AutomationTests
 {
+    private readonly int[] _seeds =
+    [
+        42, 7, 13, 99, 256, 1024, 73, 3, 17, 23,
+        5, 11, 19, 29, 31, 37, 41, 43, 47, 53,
+        59, 61, 67, 71, 79, 83, 89, 97, 101, 103,
+        107, 109, 113, 127, 131, 137, 139, 149, 151, 157,
+        163, 167, 173, 179, 181, 191, 193, 197, 199, 211,
+        223, 227, 229, 233, 239, 241, 251, 257, 263, 269,
+        271, 277, 281, 283, 293, 307, 311, 313, 317, 331,
+        337, 347, 349, 353, 359, 367, 373, 379, 383, 389,
+        397, 401, 409, 419, 421, 431, 433, 439, 443, 449,
+        457, 461, 463, 467, 479, 487, 491, 499, 503, 509
+    ];
+
+    private StreamWriter LogWriter { get; set; }
+
     [TestMethod]
     public void SimulateIris()
     {
         var data = Data.Iris;
         var metrics = Simulate(data,
             ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
-            [3, 7, 13, 42, 73, 99, 256, 1024], 2);
+            _seeds, 60, 0.2f);
+        var accuracies = metrics.Select(m =>
+            m.MacroAccuracy.ToString(CultureInfo.InvariantCulture));
+        File.WriteAllLines(
+            "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/Iris/AutoML.csv",
+            accuracies);
         Console.WriteLine(
-            string.Join(',',
-                metrics.Select(m =>
-                    m.MacroAccuracy.ToString(CultureInfo.InvariantCulture))));
+            string.Join(',', accuracies));
+    }
+
+    [TestMethod]
+    public void SimulateHeartDisease()
+    {
+        var data = Data.HeartDisease;
+        var metrics = Simulate(data,
+            ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
+            _seeds, 60, 0.2f);
+        var accuracies = metrics.Select(m =>
+            m.MacroAccuracy.ToString(CultureInfo.InvariantCulture));
+        LogWriter.Close();
+        File.WriteAllLines(
+            "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/HeartDisease/AutoML.csv",
+            accuracies);
+        Console.WriteLine(
+            string.Join(',', accuracies));
+    }
+
+    [TestMethod]
+    public void SimulateWineQuality()
+    {
+        var data = Data.WineQuality;
+        var metrics = Simulate(data,
+            ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
+            _seeds, 60, 0.2f);
+        var accuracies = metrics.Select(m =>
+            m.MacroAccuracy.ToString(CultureInfo.InvariantCulture));
+        LogWriter.Close();
+        File.WriteAllLines(
+            "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/WineQuality/AutoML.csv",
+            accuracies);
+        Console.WriteLine(
+            string.Join(',', accuracies));
     }
 
     [TestMethod]
@@ -34,34 +87,47 @@ public class AutomationTests
         var data = Data.BreastCancerWisconsinDiagnostic;
         var metrics = Simulate(data,
             ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
-            [3, 7, 13, 42, 73, 99, 256, 1024], 2);
+            [3, 7, 13, 42, 73, 99, 256, 1024], 2, 0.2f);
+        var accuracies = metrics.Select(m =>
+            m.MacroAccuracy.ToString(CultureInfo.InvariantCulture));
         Console.WriteLine(
-            string.Join(',',
-                metrics.Select(m =>
-                    m.MacroAccuracy.ToString(CultureInfo.InvariantCulture))));
+            string.Join(',', accuracies));
     }
 
 
     public IEnumerable<Metrics> Simulate(IDataset dataset,
         string[] trainers,
-        int[] seeds, int trainingTime)
+        int[] seeds, int trainingTime, float splitRatio)
     {
         var metrics = new List<Metrics>();
 
         var tmpDir = Path.GetTempPath();
+        var timeStamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+        var logPath = Path.Combine(tmpDir,
+            $"{timeStamp}.csv");
+        LogWriter = new StreamWriter(logPath);
+        LogWriter.WriteLine(
+            "\"x\"");
+
         var files =
             dataset.GetTrainValidateTestFiles(tmpDir,
+                validateFraction: splitRatio, testFraction: splitRatio,
                 seeds: seeds);
         foreach (var file in files)
         {
             // Configure
-            var configPath = GetConfiguration(tmpDir, file, dataset,
-                trainers, trainingTime);
+            var configPath = GetConfigurationFileTrainValidationSplit(tmpDir,
+                file,
+                dataset,
+                trainers, trainingTime, splitRatio);
             // Run AutoML
             RunAutoMLForConfig(tmpDir, configPath);
             // Validate
             var metric = ValidateModel(tmpDir, file, dataset);
             metrics.Add(metric);
+            LogWriter?.WriteLine(
+                $"{metric.MacroAccuracy}");
+            LogWriter?.Flush();
         }
 
         return metrics;
@@ -101,6 +167,8 @@ public class AutomationTests
                 {
                     var metrics = mlContext.MulticlassClassification
                         .Evaluate(testResult, dataset.LabelColumnName);
+                    Console.WriteLine(metrics.ConfusionMatrix
+                        .GetFormattedConfusionTable());
                     return new Metrics
                     {
                         IsMulticlassClassification = true,
@@ -127,16 +195,10 @@ public class AutomationTests
         };
     }
 
-    private string GetConfiguration(string dir, TrainValidateTestFileNames file,
+    private string GetConfiguration(string dir, string trainingData,
         IDataset dataset, string[] trainers,
-        int trainingTime)
+        int trainingTime, IValidationOption validationOption)
     {
-        var trainingData = Path.Combine(dir, file.TrainFileName);
-        var validationData = Path.Combine(dir, file.ValidateFileName);
-        var validationOption = new FileValidationOptionV0
-        {
-            FilePath = validationData
-        };
         var config = DataHelper.GenerateModelBuilderConfigForDataset(
             dataset, trainingData, ScenarioType.Classification,
             dataset.LabelColumnName,
@@ -147,6 +209,35 @@ public class AutomationTests
             "config.mbconfig");
         File.WriteAllText(configPath, config);
         return configPath;
+    }
+
+    private string GetConfigurationFileTrainValidationSplit(string dir,
+        TrainValidateTestFileNames file,
+        IDataset dataset, string[] trainers,
+        int trainingTime, float splitRatio = 0.2f)
+    {
+        var trainingData = Path.Combine(dir, file.TrainValidateFileName);
+        var validationOption = new TrainValidationSplitOptionV0
+        {
+            SplitRatio = splitRatio
+        };
+        return GetConfiguration(dir, trainingData, dataset, trainers,
+            trainingTime, validationOption);
+    }
+
+    private string GetConfigurationFileValidation(string dir,
+        TrainValidateTestFileNames file,
+        IDataset dataset, string[] trainers,
+        int trainingTime)
+    {
+        var trainingData = Path.Combine(dir, file.TrainFileName);
+        var validationData = Path.Combine(dir, file.ValidateFileName);
+        var validationOption = new FileValidationOptionV0
+        {
+            FilePath = validationData
+        };
+        return GetConfiguration(dir, trainingData, dataset, trainers,
+            trainingTime, validationOption);
     }
 
     private void RunAutoMLForConfig(string workingDirectory, string configFile)

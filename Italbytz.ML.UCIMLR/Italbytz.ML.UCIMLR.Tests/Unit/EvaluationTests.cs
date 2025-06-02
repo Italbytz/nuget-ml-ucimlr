@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Italbytz.ML.ModelBuilder.Configuration;
-using Italbytz.ML.UCIMLR.Trainers;
+using Italbytz.ML.Trainers;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
@@ -141,9 +141,6 @@ public class EvaluationTests
         var pipeline = data.BuildPipeline(mlContext,
             ScenarioType.Classification, trainer);
         var model = pipeline.Fit(data.DataView);
-        var modelParams = model.ExtractModel();
-        var allParams = RetrieveModelParameters(model);
-
         var predictions = model.Transform(data.DataView);
         return mlContext.MulticlassClassification.Evaluate(predictions,
             data.LabelColumnName);

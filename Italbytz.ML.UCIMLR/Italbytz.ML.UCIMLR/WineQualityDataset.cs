@@ -7,11 +7,148 @@ namespace Italbytz.ML.UCIMLR;
 public class
     WineQualityDataset : Dataset<WineQualityDataset.WineQualityModelInput>
 {
+    protected override string ResourceName { get; } =
+        "Italbytz.ML.UCIMLR.Data.Wine_Quality.csv";
+
+    protected override string FilePrefix { get; } = "wine_quality";
+
+    public override string? LabelColumnName { get; } = @"quality";
+
+    protected override string ColumnPropertiesString { get; } = """
+        [
+          {
+            "ColumnName": "fixed_acidity",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "volatile_acidity",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "citric_acid",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "residual_sugar",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "chlorides",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "free_sulfur_dioxide",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "total_sulfur_dioxide",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "density",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "pH",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "sulphates",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "alcohol",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "quality",
+            "ColumnPurpose": "Label",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          }
+        ]
+        """;
+
     public override IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
         ScenarioType scenarioType,
         IEstimator<ITransformer> estimator)
     {
-        throw new NotImplementedException();
+        var pipeline = mlContext.Transforms.ReplaceMissingValues(new[]
+            {
+                new InputOutputColumnPair(@"fixed_acidity", @"fixed_acidity"),
+                new InputOutputColumnPair(@"volatile_acidity",
+                    @"volatile_acidity"),
+                new InputOutputColumnPair(@"citric_acid", @"citric_acid"),
+                new InputOutputColumnPair(@"residual_sugar", @"residual_sugar"),
+                new InputOutputColumnPair(@"chlorides", @"chlorides"),
+                new InputOutputColumnPair(@"free_sulfur_dioxide",
+                    @"free_sulfur_dioxide"),
+                new InputOutputColumnPair(@"total_sulfur_dioxide",
+                    @"total_sulfur_dioxide"),
+                new InputOutputColumnPair(@"density", @"density"),
+                new InputOutputColumnPair(@"pH", @"pH"),
+                new InputOutputColumnPair(@"sulphates", @"sulphates"),
+                new InputOutputColumnPair(@"alcohol", @"alcohol")
+            })
+            .Append(mlContext.Transforms.Concatenate(@"Features",
+                @"fixed_acidity", @"volatile_acidity", @"citric_acid",
+                @"residual_sugar", @"chlorides", @"free_sulfur_dioxide",
+                @"total_sulfur_dioxide", @"density", @"pH", @"sulphates",
+                @"alcohol"))
+            .Append(mlContext.Transforms.Conversion.MapValueToKey(@"quality",
+                @"quality", addKeyValueAnnotationsAsText: false))
+            .Append(estimator)
+            .Append(
+                mlContext.Transforms.Conversion.MapKeyToValue(@"PredictedLabel",
+                    @"PredictedLabel"));
+
+        return pipeline;
     }
 
     public override IDataView LoadFromTextFile(string path,

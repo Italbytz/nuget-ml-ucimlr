@@ -7,11 +7,161 @@ namespace Italbytz.ML.UCIMLR;
 public class
     HeartDiseaseDataset : Dataset<HeartDiseaseDataset.HeartDiseaseModelInput>
 {
+    protected override string ColumnPropertiesString { get; } = """
+        [
+          {
+            "ColumnName": "age",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "sex",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "cp",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "trestbps",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "chol",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "fbs",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "restecg",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "thalach",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "exang",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "oldpeak",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "slope",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "ca",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "thal",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "num",
+            "ColumnPurpose": "Label",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          }
+        ]
+        """;
+
+    protected override string ResourceName { get; } =
+        "Italbytz.ML.UCIMLR.Data.Heart_Disease.csv";
+
+    protected override string FilePrefix { get; } = "heart_disease";
+
+    public override string? LabelColumnName { get; } = @"num";
+
     public override IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
         ScenarioType scenarioType,
         IEstimator<ITransformer> estimator)
     {
-        throw new NotImplementedException();
+        var pipeline = mlContext.Transforms.ReplaceMissingValues(new[]
+            {
+                new InputOutputColumnPair(@"age", @"age"),
+                new InputOutputColumnPair(@"sex", @"sex"),
+                new InputOutputColumnPair(@"cp", @"cp"),
+                new InputOutputColumnPair(@"trestbps", @"trestbps"),
+                new InputOutputColumnPair(@"chol", @"chol"),
+                new InputOutputColumnPair(@"fbs", @"fbs"),
+                new InputOutputColumnPair(@"restecg", @"restecg"),
+                new InputOutputColumnPair(@"thalach", @"thalach"),
+                new InputOutputColumnPair(@"exang", @"exang"),
+                new InputOutputColumnPair(@"oldpeak", @"oldpeak"),
+                new InputOutputColumnPair(@"slope", @"slope"),
+                new InputOutputColumnPair(@"ca", @"ca"),
+                new InputOutputColumnPair(@"thal", @"thal")
+            })
+            .Append(mlContext.Transforms.Concatenate(@"Features", @"age",
+                @"sex", @"cp", @"trestbps", @"chol", @"fbs", @"restecg",
+                @"thalach", @"exang", @"oldpeak", @"slope", @"ca", @"thal"))
+            .Append(mlContext.Transforms.Conversion.MapValueToKey(@"num",
+                @"num", addKeyValueAnnotationsAsText: false))
+            .Append(estimator)
+            .Append(
+                mlContext.Transforms.Conversion.MapKeyToValue(@"PredictedLabel",
+                    @"PredictedLabel"));
+
+        return pipeline;
     }
 
     public override IDataView LoadFromTextFile(string path,
