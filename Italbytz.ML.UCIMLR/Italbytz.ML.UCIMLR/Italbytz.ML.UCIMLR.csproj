@@ -19,7 +19,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Italbytz.ML" Version="9.8.1"/>
+        <PackageReference Include="Italbytz.ML" Version="9.8.4" />
         <PackageReference Include="Microsoft.ML" Version="4.0.2"/>
     </ItemGroup>
 

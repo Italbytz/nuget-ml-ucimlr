@@ -61,14 +61,27 @@ public class DataHelper
         string[] trainers, IValidationOption validationOption,
         [CanBeNull] IEnvironment environment = null)
     {
-        var trainingOption = new ClassificationTrainingOptionV2
+        ITrainingOption trainingOption = scenario switch
         {
-            Subsampling = false,
-            TrainingTime = trainingTime,
-            LabelColumn = labelColumn,
-            AvailableTrainers = trainers,
-            ValidationOption = validationOption
+            ScenarioType.Classification => new ClassificationTrainingOptionV2
+            {
+                Subsampling = false,
+                TrainingTime = trainingTime,
+                LabelColumn = labelColumn,
+                AvailableTrainers = trainers,
+                ValidationOption = validationOption
+            },
+            ScenarioType.Regression => new RegressionTrainingOptionV2
+            {
+                Subsampling = false,
+                TrainingTime = trainingTime,
+                LabelColumn = labelColumn,
+                AvailableTrainers = trainers,
+                ValidationOption = validationOption
+            },
+            _ => null
         };
+
         return GenerateModelBuilderConfigForDataset(dataSet, trainingFilePath,
             scenario, trainingOption, environment);
     }

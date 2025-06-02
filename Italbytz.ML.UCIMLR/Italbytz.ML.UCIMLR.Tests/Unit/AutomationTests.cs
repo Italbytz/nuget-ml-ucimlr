@@ -32,10 +32,10 @@ public class AutomationTests
     private StreamWriter LogWriter { get; set; }
 
     [TestMethod]
-    public void SimulateIris()
+    public void SimulateIrisClassification()
     {
         var data = Data.Iris;
-        var metrics = Simulate(data,
+        var metrics = Simulate(data, ScenarioType.Classification,
             ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
             _seeds, 60, 0.2f);
         var accuracies = metrics.Select(m =>
@@ -48,10 +48,10 @@ public class AutomationTests
     }
 
     [TestMethod]
-    public void SimulateHeartDisease()
+    public void SimulateHeartDiseaseClassification()
     {
         var data = Data.HeartDisease;
-        var metrics = Simulate(data,
+        var metrics = Simulate(data, ScenarioType.Classification,
             ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
             _seeds, 60, 0.2f);
         var accuracies = metrics.Select(m =>
@@ -65,27 +65,44 @@ public class AutomationTests
     }
 
     [TestMethod]
-    public void SimulateWineQuality()
+    public void SimulateWineQualityClassification()
     {
         var data = Data.WineQuality;
-        var metrics = Simulate(data,
+        var metrics = Simulate(data, ScenarioType.Classification,
             ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
             _seeds, 60, 0.2f);
-        var accuracies = metrics.Select(m =>
+        var rSquared = metrics.Select(m =>
             m.MacroAccuracy.ToString(CultureInfo.InvariantCulture));
         LogWriter.Close();
         File.WriteAllLines(
             "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/WineQuality/AutoML.csv",
+            rSquared);
+        Console.WriteLine(
+            string.Join(',', rSquared));
+    }
+
+    [TestMethod]
+    public void SimulateWineQualityRegression()
+    {
+        var data = Data.WineQuality;
+        var metrics = Simulate(data, ScenarioType.Regression,
+            ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
+            _seeds, 60, 0.2f);
+        var accuracies = metrics.Select(m =>
+            m.RSquared.ToString(CultureInfo.InvariantCulture));
+        LogWriter.Close();
+        File.WriteAllLines(
+            "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/WineQuality/AutoMLRegression.csv",
             accuracies);
         Console.WriteLine(
             string.Join(',', accuracies));
     }
 
     [TestMethod]
-    public void SimulateBreastCancerWisconsinDiagnostic()
+    public void SimulateBreastCancerWisconsinDiagnosticClassification()
     {
         var data = Data.BreastCancerWisconsinDiagnostic;
-        var metrics = Simulate(data,
+        var metrics = Simulate(data, ScenarioType.Classification,
             ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
             [3, 7, 13, 42, 73, 99, 256, 1024], 2, 0.2f);
         var accuracies = metrics.Select(m =>
@@ -96,7 +113,7 @@ public class AutomationTests
 
 
     public IEnumerable<Metrics> Simulate(IDataset dataset,
-        string[] trainers,
+        ScenarioType scenario, string[] trainers,
         int[] seeds, int trainingTime, float splitRatio)
     {
         var metrics = new List<Metrics>();
@@ -117,7 +134,7 @@ public class AutomationTests
         {
             // Configure
             var configPath = GetConfigurationFileTrainValidationSplit(tmpDir,
-                file,
+                file, scenario,
                 dataset,
                 trainers, trainingTime, splitRatio);
             // Run AutoML
@@ -125,8 +142,18 @@ public class AutomationTests
             // Validate
             var metric = ValidateModel(tmpDir, file, dataset);
             metrics.Add(metric);
+            var metricForCSV = scenario switch
+            {
+                ScenarioType.Classification => metric.IsBinaryClassification
+                    ? metric.Accuracy
+                    : metric.MacroAccuracy,
+                ScenarioType.Regression => metric.RSquared,
+                _ => throw new ArgumentOutOfRangeException(nameof(scenario),
+                    scenario, null)
+            };
             LogWriter?.WriteLine(
-                $"{metric.MacroAccuracy}");
+                $"{metricForCSV}");
+
             LogWriter?.Flush();
         }
 
@@ -177,8 +204,24 @@ public class AutomationTests
                 }
                 catch (Exception e2)
                 {
-                    Console.WriteLine(
-                        $"Neither binary nor multiclass metrics available for {testData}.");
+                    try
+                    {
+                        var metrics = mlContext.Regression
+                            .Evaluate(testResult, dataset.LabelColumnName);
+                        return new Metrics
+                        {
+                            IsRegression = true,
+                            RSquared = metrics.RSquared,
+                            MeanAbsoluteError = metrics.MeanAbsoluteError,
+                            MeanSquaredError = metrics.MeanSquaredError,
+                            RootMeanSquaredError = metrics.RootMeanSquaredError
+                        };
+                    }
+                    catch (Exception e3)
+                    {
+                        Console.WriteLine(
+                            $"No binary, multiclass or regression metrics available for {testData}.");
+                    }
                 }
             }
         }
@@ -196,11 +239,12 @@ public class AutomationTests
     }
 
     private string GetConfiguration(string dir, string trainingData,
+        ScenarioType scenario,
         IDataset dataset, string[] trainers,
         int trainingTime, IValidationOption validationOption)
     {
         var config = DataHelper.GenerateModelBuilderConfigForDataset(
-            dataset, trainingData, ScenarioType.Classification,
+            dataset, trainingData, scenario,
             dataset.LabelColumnName,
             trainingTime,
             trainers,
@@ -212,7 +256,7 @@ public class AutomationTests
     }
 
     private string GetConfigurationFileTrainValidationSplit(string dir,
-        TrainValidateTestFileNames file,
+        TrainValidateTestFileNames file, ScenarioType scenario,
         IDataset dataset, string[] trainers,
         int trainingTime, float splitRatio = 0.2f)
     {
@@ -221,12 +265,12 @@ public class AutomationTests
         {
             SplitRatio = splitRatio
         };
-        return GetConfiguration(dir, trainingData, dataset, trainers,
+        return GetConfiguration(dir, trainingData, scenario, dataset, trainers,
             trainingTime, validationOption);
     }
 
     private string GetConfigurationFileValidation(string dir,
-        TrainValidateTestFileNames file,
+        TrainValidateTestFileNames file, ScenarioType scenario,
         IDataset dataset, string[] trainers,
         int trainingTime)
     {
@@ -236,7 +280,7 @@ public class AutomationTests
         {
             FilePath = validationData
         };
-        return GetConfiguration(dir, trainingData, dataset, trainers,
+        return GetConfiguration(dir, trainingData, scenario, dataset, trainers,
             trainingTime, validationOption);
     }
 
