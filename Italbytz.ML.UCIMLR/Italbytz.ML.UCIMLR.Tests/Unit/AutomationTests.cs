@@ -65,6 +65,23 @@ public class AutomationTests
     }
 
     [TestMethod]
+    public void SimulateHeartDiseaseBinaryClassification()
+    {
+        var data = Data.HeartDiseaseBinary;
+        var metrics = Simulate(data, ScenarioType.Classification,
+            ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
+            _seeds, 60, 0.2f);
+        var accuracies = metrics.Select(m =>
+            m.MacroAccuracy.ToString(CultureInfo.InvariantCulture));
+        LogWriter.Close();
+        File.WriteAllLines(
+            "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/HeartDisease/AutoMLBinary.csv",
+            accuracies);
+        Console.WriteLine(
+            string.Join(',', accuracies));
+    }
+
+    [TestMethod]
     public void SimulateWineQualityClassification()
     {
         var data = Data.WineQuality;
