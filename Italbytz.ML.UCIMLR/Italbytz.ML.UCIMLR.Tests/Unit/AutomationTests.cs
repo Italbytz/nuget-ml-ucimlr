@@ -4,13 +4,14 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using Italbytz.ML.Data;
 using Italbytz.ML.ModelBuilder.Configuration;
 using Italbytz.ML.Tests.Util;
+using JetBrains.Annotations;
 using Microsoft.ML;
+using Microsoft.ML.Data;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Italbytz.ML.UCIMLR.Tests.Unit;
+namespace Italbytz.ML.Data.Tests.Unit;
 
 [TestClass]
 public class AutomationTests
@@ -28,6 +29,8 @@ public class AutomationTests
         397, 401, 409, 419, 421, 431, 433, 439, 443, 449,
         457, 461, 463, 467, 479, 487, 491, 499, 503, 509
     ];
+
+    private string _timeStamp;
 
     private StreamWriter LogWriter { get; set; }
 
@@ -70,12 +73,29 @@ public class AutomationTests
         var data = Data.HeartDiseaseBinary;
         var metrics = Simulate(data, ScenarioType.Classification,
             ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
-            _seeds, 60, 0.2f);
+            _seeds, 10, 0.2f, true);
         var accuracies = metrics.Select(m =>
-            m.MacroAccuracy.ToString(CultureInfo.InvariantCulture));
+            m.F1Score.ToString(CultureInfo.InvariantCulture));
         LogWriter.Close();
         File.WriteAllLines(
             "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/HeartDisease/AutoMLBinary.csv",
+            accuracies);
+        Console.WriteLine(
+            string.Join(',', accuracies));
+    }
+
+    [TestMethod]
+    public void SimulateBreastCancerWisconsinDiagnosticBinaryClassification()
+    {
+        var data = Data.BreastCancerWisconsinDiagnostic;
+        var metrics = Simulate(data, ScenarioType.Classification,
+            ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
+            _seeds, 60, 0.2f, true);
+        var accuracies = metrics.Select(m =>
+            m.F1Score.ToString(CultureInfo.InvariantCulture));
+        LogWriter.Close();
+        File.WriteAllLines(
+            "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/BreastCancerWisconsinDiagnostic/AutoMLBinary.csv",
             accuracies);
         Console.WriteLine(
             string.Join(',', accuracies));
@@ -128,17 +148,33 @@ public class AutomationTests
             string.Join(',', accuracies));
     }
 
+    [TestMethod]
+    public void SimulateAdultBinaryClassification()
+    {
+        var data = Data.Adult;
+        var metrics = Simulate(data, ScenarioType.Classification,
+            ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
+            _seeds, 60, 0.2f, true);
+        var accuracies = metrics.Select(m =>
+            m.MacroAccuracy.ToString(CultureInfo.InvariantCulture));
+        LogWriter.Close();
+        File.WriteAllLines(
+            "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/Adult/AutoMLBinary.csv",
+            accuracies);
+        Console.WriteLine(
+            string.Join(',', accuracies));
+    }
 
-    public IEnumerable<Metrics> Simulate(IDataset dataset,
+    private IEnumerable<Metrics> Simulate(IDataset dataset,
         ScenarioType scenario, string[] trainers,
-        int[] seeds, int trainingTime, float splitRatio)
+        int[] seeds, int trainingTime, float splitRatio, bool binary = false)
     {
         var metrics = new List<Metrics>();
 
         var tmpDir = Path.GetTempPath();
-        var timeStamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+        _timeStamp = DateTime.Now.ToString("yyyyMMddHHmmss");
         var logPath = Path.Combine(tmpDir,
-            $"{timeStamp}.csv");
+            $"{dataset.FilePrefix}_{_timeStamp}_Metrics.csv");
         LogWriter = new StreamWriter(logPath);
         LogWriter.WriteLine(
             "\"x\"");
@@ -157,12 +193,12 @@ public class AutomationTests
             // Run AutoML
             RunAutoMLForConfig(tmpDir, configPath);
             // Validate
-            var metric = ValidateModel(tmpDir, file, dataset);
+            var metric = ValidateModel(tmpDir, file, dataset, binary);
             metrics.Add(metric);
             var metricForCSV = scenario switch
             {
                 ScenarioType.Classification => metric.IsBinaryClassification
-                    ? metric.Accuracy
+                    ? metric.F1Score
                     : metric.MacroAccuracy,
                 ScenarioType.Regression => metric.RSquared,
                 _ => throw new ArgumentOutOfRangeException(nameof(scenario),
@@ -177,61 +213,83 @@ public class AutomationTests
         return metrics;
     }
 
+    [CanBeNull]
     private Metrics ValidateModel(string tmpDir,
-        TrainValidateTestFileNames file, IDataset dataset)
+        TrainValidateTestFileNames file, IDataset dataset, bool binary)
     {
         var testData = Path.Combine(tmpDir, file.TestFileName);
         var modelPath = Path.Combine(tmpDir,
             "config.mlnet");
         var mlContext = new MLContext();
+        Metrics? metrics = null;
         try
         {
             var mlModel = mlContext.Model.Load(modelPath, out _);
+            var param = mlModel.GetModelParameters();
             var testDataView = dataset.LoadFromTextFile(testData,
                 ',', true);
-
             var testResult = mlModel.Transform(testDataView);
+            ConfusionMatrix? confusionMatrix = null;
+            string? pfiTable = null;
             try
             {
-                var metrics = mlContext.BinaryClassification
+                var binaryMetrics = mlContext.BinaryClassification
                     .Evaluate(testResult, dataset.LabelColumnName);
-                return new Metrics
+                confusionMatrix = binaryMetrics.ConfusionMatrix;
+                metrics = new Metrics
                 {
                     IsBinaryClassification = true,
-                    Accuracy = metrics.Accuracy,
-                    AreaUnderRocCurve = metrics.AreaUnderRocCurve,
-                    F1Score = metrics.F1Score,
+                    Accuracy = binaryMetrics.Accuracy,
+                    AreaUnderRocCurve = binaryMetrics.AreaUnderRocCurve,
+                    F1Score = binaryMetrics.F1Score,
                     AreaUnderPrecisionRecallCurve =
-                        metrics.AreaUnderPrecisionRecallCurve
+                        binaryMetrics.AreaUnderPrecisionRecallCurve
                 };
             }
             catch (Exception e1)
             {
                 try
                 {
-                    var metrics = mlContext.MulticlassClassification
+                    var multiclassMetrics = mlContext.MulticlassClassification
                         .Evaluate(testResult, dataset.LabelColumnName);
-                    Console.WriteLine(metrics.ConfusionMatrix
-                        .GetFormattedConfusionTable());
-                    return new Metrics
+                    confusionMatrix = multiclassMetrics.ConfusionMatrix;
+                    pfiTable =
+                        mlContext.MulticlassClassification
+                            .GetPermutationFeatureImportanceTable(mlModel,
+                                testResult, dataset.LabelColumnName,
+                                Metric.MacroAccuracy);
+                    if (binary)
+                        metrics = new Metrics
+                        {
+                            IsBinaryClassification = true,
+                            Accuracy = multiclassMetrics.MicroAccuracy,
+                            MacroAccuracy = multiclassMetrics.MacroAccuracy,
+                            F1Score = multiclassMetrics.F1ScoreBinary()
+                        };
+
+                    metrics = new Metrics
                     {
                         IsMulticlassClassification = true,
-                        MacroAccuracy = metrics.MacroAccuracy
+                        Accuracy = multiclassMetrics.MicroAccuracy,
+                        MacroAccuracy = multiclassMetrics.MacroAccuracy
                     };
                 }
                 catch (Exception e2)
                 {
                     try
                     {
-                        var metrics = mlContext.Regression
+                        var regressionMetrics = mlContext.Regression
                             .Evaluate(testResult, dataset.LabelColumnName);
-                        return new Metrics
+                        metrics = new Metrics
                         {
                             IsRegression = true,
-                            RSquared = metrics.RSquared,
-                            MeanAbsoluteError = metrics.MeanAbsoluteError,
-                            MeanSquaredError = metrics.MeanSquaredError,
-                            RootMeanSquaredError = metrics.RootMeanSquaredError
+                            RSquared = regressionMetrics.RSquared,
+                            MeanAbsoluteError =
+                                regressionMetrics.MeanAbsoluteError,
+                            MeanSquaredError =
+                                regressionMetrics.MeanSquaredError,
+                            RootMeanSquaredError =
+                                regressionMetrics.RootMeanSquaredError
                         };
                     }
                     catch (Exception e3)
@@ -241,6 +299,14 @@ public class AutomationTests
                     }
                 }
             }
+
+            // Confusion matrix
+            Console.WriteLine(confusionMatrix?.GetFormattedConfusionTable());
+            // PFI
+            _timeStamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+            var pfiPath = Path.Combine(tmpDir,
+                $"{dataset.FilePrefix}_{_timeStamp}_PFI.csv");
+            File.WriteAllText(pfiPath, pfiTable);
         }
         catch (Exception e)
         {
@@ -248,11 +314,8 @@ public class AutomationTests
                 $"Error loading model for data set {testData}.");
         }
 
-        return new Metrics
-        {
-            MacroAccuracy = 0.0f,
-            Accuracy = 0.0f
-        };
+
+        return metrics;
     }
 
     private string GetConfiguration(string dir, string trainingData,

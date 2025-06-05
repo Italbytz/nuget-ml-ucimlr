@@ -8,7 +8,7 @@ using Microsoft.ML.Trainers;
 using Microsoft.ML.Trainers.FastTree;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Italbytz.ML.UCIMLR.Tests.Unit;
+namespace Italbytz.ML.Data.Tests.Unit;
 
 [TestClass]
 public class EvaluationTests
@@ -184,52 +184,5 @@ public class EvaluationTests
         }
 
         return modelParameters;
-    }
-
-    private void ExplainOld(ITransformer transformer)
-    {
-        if (transformer is not IEnumerable<ITransformer> chain) return;
-        foreach (var predictionTransformerCandidate in chain)
-            if (predictionTransformerCandidate is
-                IPredictionTransformer<ICanSaveModel>)
-                transformer = predictionTransformerCandidate;
-        if (transformer is not IPredictionTransformer<ICanSaveModel>
-            predictionTransformer) return;
-        var model = predictionTransformer.Model;
-
-        // Zugriff auf die interne Property "SubModelParameters" per Reflection
-        var subModelParamsProp = model?.GetType()
-            .GetProperty("SubModelParameters",
-                BindingFlags.Instance | BindingFlags.NonPublic |
-                BindingFlags.Public);
-        if (subModelParamsProp != null)
-        {
-            var subModelParams =
-                subModelParamsProp.GetValue(model) as IEnumerable<object>;
-            if (subModelParams != null)
-                foreach (var subModel in subModelParams)
-                {
-                    // Hier kann weitere Verarbeitung erfolgen, z\.B\. Logging oder Analyse
-                }
-        }
-
-
-        /*if (model is TransformerChain<KeyToValueMappingTransformer> chain)
-        {
-            foreach (var transformer in chain)
-            {
-                if (transformer is MulticlassPredictionTransformer<
-                        OneVersusAllModelParameters> ova)
-                {
-                    var ovaModel = ova.Model;
-                    foreach (var submodel in ovaModel.SubModelParameters)
-                    {
-
-                    }
-
-                }
-            }
-            return;
-        }*/
     }
 }

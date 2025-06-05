@@ -19,7 +19,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Italbytz.ML" Version="9.9.0" />
+        <PackageReference Include="Italbytz.ML" Version="9.9.1"/>
         <PackageReference Include="Microsoft.ML" Version="4.0.2"/>
     </ItemGroup>
 
@@ -42,6 +42,10 @@
         </EmbeddedResource>
         <None Remove="Data\Heart_Disease_Binary.csv"/>
         <EmbeddedResource Include="Data\Heart_Disease_Binary.csv">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </EmbeddedResource>
+        <None Remove="Data\Adult.csv"/>
+        <EmbeddedResource Include="Data\Adult.csv">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </EmbeddedResource>
     </ItemGroup>

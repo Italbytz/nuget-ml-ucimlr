@@ -4,7 +4,7 @@ using Italbytz.ML.Data;
 using Italbytz.ML.ModelBuilder.Configuration;
 using Microsoft.ML;
 
-namespace Italbytz.ML.UCIMLR;
+namespace Italbytz.ML.Data;
 
 public abstract class Dataset<TModelInput> : IDataset
 {
@@ -13,9 +13,9 @@ public abstract class Dataset<TModelInput> : IDataset
     private IDataView? _dataView;
 
     protected virtual string ColumnPropertiesString { get; }
-    protected virtual string FilePrefix { get; }
 
     protected virtual string ResourceName { get; }
+    public virtual string FilePrefix { get; }
 
     public IColumnProperties[] ColumnProperties =>
         _columnProperties ??= GetColumnProperties();

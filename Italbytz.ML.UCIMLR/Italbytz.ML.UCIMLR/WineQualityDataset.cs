@@ -2,7 +2,7 @@ using Italbytz.ML.ModelBuilder.Configuration;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 
-namespace Italbytz.ML.UCIMLR;
+namespace Italbytz.ML.Data;
 
 public class
     WineQualityDataset : Dataset<WineQualityDataset.WineQualityModelInput>
@@ -10,7 +10,7 @@ public class
     protected override string ResourceName { get; } =
         "Italbytz.ML.UCIMLR.Data.Wine_Quality.csv";
 
-    protected override string FilePrefix { get; } = "wine_quality";
+    public override string FilePrefix { get; } = "wine_quality";
 
     public override string? LabelColumnName { get; } = @"quality";
 

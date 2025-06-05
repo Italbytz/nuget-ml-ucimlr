@@ -2,7 +2,7 @@ using Italbytz.ML.ModelBuilder.Configuration;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 
-namespace Italbytz.ML.UCIMLR;
+namespace Italbytz.ML.Data;
 
 public class BreastCancerWisconsinDiagnosticDataset : Dataset<
     BreastCancerWisconsinDiagnosticDataset.
@@ -11,7 +11,7 @@ public class BreastCancerWisconsinDiagnosticDataset : Dataset<
     protected override string ResourceName { get; } =
         "Italbytz.ML.UCIMLR.Data.Breast_Cancer_Wisconsin_Diagnostic_.csv";
 
-    protected override string FilePrefix { get; } = "bcwd";
+    public override string FilePrefix { get; } = "bcwd";
 
     public override string? LabelColumnName { get; } = @"Diagnosis";
 

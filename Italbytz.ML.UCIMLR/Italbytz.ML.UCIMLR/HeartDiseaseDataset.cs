@@ -2,7 +2,7 @@ using Italbytz.ML.ModelBuilder.Configuration;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 
-namespace Italbytz.ML.UCIMLR;
+namespace Italbytz.ML.Data;
 
 public class
     HeartDiseaseDataset : Dataset<HeartDiseaseDataset.HeartDiseaseModelInput>
@@ -127,7 +127,7 @@ public class
     protected override string ResourceName { get; } =
         "Italbytz.ML.UCIMLR.Data.Heart_Disease.csv";
 
-    protected override string FilePrefix { get; } = "heart_disease";
+    public override string FilePrefix { get; } = "heart_disease";
 
     public override string? LabelColumnName { get; } = @"num";
 

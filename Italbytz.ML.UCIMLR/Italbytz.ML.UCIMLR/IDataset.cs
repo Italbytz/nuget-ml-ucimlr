@@ -2,7 +2,7 @@ using Italbytz.ML.Data;
 using Italbytz.ML.ModelBuilder.Configuration;
 using Microsoft.ML;
 
-namespace Italbytz.ML.UCIMLR;
+namespace Italbytz.ML.Data;
 
 public interface IDataset
 {
@@ -10,6 +10,8 @@ public interface IDataset
     public IDataView DataView { get; }
 
     public IColumnProperties[] ColumnProperties { get; }
+
+    public string FilePrefix { get; }
 
     public IEnumerable<TrainValidateTestFileNames> GetTrainValidateTestFiles(
         string saveFolderPath,

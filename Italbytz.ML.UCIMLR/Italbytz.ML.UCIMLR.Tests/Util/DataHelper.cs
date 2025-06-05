@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Italbytz.ML.ModelBuilder.Configuration;
-using Italbytz.ML.UCIMLR;
+using Italbytz.ML.Data;
 using JetBrains.Annotations;
 
 namespace Italbytz.ML.Tests.Util;
