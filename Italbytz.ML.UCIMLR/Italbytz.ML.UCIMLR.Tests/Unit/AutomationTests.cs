@@ -4,11 +4,16 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Italbytz.ML.ModelBuilder.Configuration;
 using Italbytz.ML.Tests.Util;
+using Italbytz.ML.Trainers;
+using Italbytz.ML.Trainers.FastTree;
 using JetBrains.Annotations;
 using Microsoft.ML;
+using Microsoft.ML.Calibrators;
 using Microsoft.ML.Data;
+using Microsoft.ML.Trainers.FastTree;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Italbytz.ML.Data.Tests.Unit;
@@ -51,6 +56,16 @@ public class AutomationTests
     }
 
     [TestMethod]
+    public void ExplainIrisClassification()
+    {
+        var data = Data.Iris;
+        Simulate(data, ScenarioType.Classification,
+            ["FASTTREE"],
+            _seeds, 60, 0.2f);
+        LogWriter.Close();
+    }
+
+    [TestMethod]
     public void SimulateHeartDiseaseClassification()
     {
         var data = Data.HeartDisease;
@@ -68,12 +83,22 @@ public class AutomationTests
     }
 
     [TestMethod]
+    public void ExplainHeartDiseaseBinaryClassification()
+    {
+        var data = Data.HeartDiseaseBinary;
+        Simulate(data, ScenarioType.Classification,
+            ["FASTTREE"],
+            _seeds, 60, 0.2f, true);
+        LogWriter.Close();
+    }
+
+    [TestMethod]
     public void SimulateHeartDiseaseBinaryClassification()
     {
         var data = Data.HeartDiseaseBinary;
         var metrics = Simulate(data, ScenarioType.Classification,
             ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
-            _seeds, 10, 0.2f, true);
+            _seeds, 60, 0.2f, true);
         var accuracies = metrics.Select(m =>
             m.F1Score.ToString(CultureInfo.InvariantCulture));
         LogWriter.Close();
@@ -225,12 +250,12 @@ public class AutomationTests
         try
         {
             var mlModel = mlContext.Model.Load(modelPath, out _);
-            var param = mlModel.GetModelParameters();
             var testDataView = dataset.LoadFromTextFile(testData,
                 ',', true);
             var testResult = mlModel.Transform(testDataView);
             ConfusionMatrix? confusionMatrix = null;
             string? pfiTable = null;
+            var modelParameters = mlModel.GetModelParameters();
             try
             {
                 var binaryMetrics = mlContext.BinaryClassification
@@ -300,13 +325,8 @@ public class AutomationTests
                 }
             }
 
-            // Confusion matrix
-            Console.WriteLine(confusionMatrix?.GetFormattedConfusionTable());
-            // PFI
-            _timeStamp = DateTime.Now.ToString("yyyyMMddHHmmss");
-            var pfiPath = Path.Combine(tmpDir,
-                $"{dataset.FilePrefix}_{_timeStamp}_PFI.csv");
-            File.WriteAllText(pfiPath, pfiTable);
+            ExplainModel(tmpDir, dataset.FilePrefix, modelParameters,
+                confusionMatrix, pfiTable);
         }
         catch (Exception e)
         {
@@ -316,6 +336,107 @@ public class AutomationTests
 
 
         return metrics;
+    }
+
+    private void ExplainModel(string tmpDir, string filePrefix,
+        ICanSaveModel modelParameters, ConfusionMatrix? confusionMatrix,
+        string? pfiTable)
+    {
+        _timeStamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+        var explanationsDir = Path.Combine(tmpDir, "explanations");
+        if (!Directory.Exists(explanationsDir))
+            Directory.CreateDirectory(explanationsDir);
+
+        // Confusion matrix
+        if (confusionMatrix != null)
+        {
+            var confusionMatrixPath = Path.Combine(explanationsDir,
+                $"{filePrefix}_{_timeStamp}_ConfusionMatrix.");
+            File.WriteAllText(confusionMatrixPath + "txt",
+                confusionMatrix.GetFormattedConfusionTable());
+            File.WriteAllText(confusionMatrixPath + "py",
+                confusionMatrix.SklearnScript(confusionMatrixPath + "pdf"));
+        }
+
+        // PFI
+        var pfiPath = Path.Combine(explanationsDir,
+            $"{filePrefix}_{_timeStamp}_PFI.csv");
+        if (pfiTable == null)
+        {
+            pfiTable = "No PFI table available.";
+        }
+        else
+        {
+            pfiTable = pfiTable.Replace("\r\n", "\n");
+            pfiTable = pfiTable.Replace("\r", "\n");
+        }
+
+        File.WriteAllText(pfiPath, pfiTable);
+
+        // Model parameters
+        // ToDO: Currently hard coded for FastTreeBinaryModelParameters
+        if (modelParameters is PublicOneVersusAllModelParameters pova)
+            foreach (var submodel in pova.SubModelParameters)
+                if (submodel is CalibratedModelParametersBase cmp)
+                {
+                    var subModelProperty =
+                        typeof(CalibratedModelParametersBase).GetProperty(
+                            "SubModel",
+                            BindingFlags.DeclaredOnly | BindingFlags.Instance |
+                            BindingFlags.NonPublic |
+                            BindingFlags.Public | BindingFlags.Static);
+                    if (subModelProperty != null)
+                    {
+                        var subModels = subModelProperty.GetValue(submodel);
+                        if (subModels is FastTreeBinaryModelParameters
+                            treeBinaryModelParameters)
+                        {
+                            var trees = treeBinaryModelParameters
+                                .TrainedTreeEnsemble;
+                            var index = 0;
+                            foreach (var tree in trees.Trees)
+                            {
+                                var graphviz = tree.ToGraphviz();
+                                var graphvizPath = Path.Combine(
+                                    explanationsDir,
+                                    $"{filePrefix}_{_timeStamp}_Tree_{index}.dot");
+                                File.WriteAllText(graphvizPath, graphviz);
+                                var plantuml = tree.ToPlantUML();
+                                var plantumlPath = Path.Combine(
+                                    explanationsDir,
+                                    $"{filePrefix}_{_timeStamp}_Tree_{index}.pu");
+                                File.WriteAllText(plantumlPath, plantuml);
+
+                                index++;
+                            }
+                        }
+                    }
+                }
+        /*                if (subModelsProperty != null)
+                {
+                    var subModels = subModelsProperty.GetValue(submodel);
+                    if (subModels != null)
+                        if (subModels is FastTreeBinaryModelParameters
+                            treeParameters)
+                        {
+                            var ensemble = treeParameters.TrainedTreeEnsemble;
+                            var index = 0;
+                            foreach (var tree in ensemble.Trees)
+                            {
+                                var graphviz = tree.ToGraphviz();
+                                var graphvizPath = Path.Combine(
+                                    explanationsDir,
+                                    $"{filePrefix}_{_timeStamp}_Tree_{index}.dot");
+                                File.WriteAllText(graphvizPath, graphviz);
+                                var plantuml = tree.ToPlantUML();
+                                var plantumlPath = Path.Combine(
+                                    explanationsDir,
+                                    $"{filePrefix}_{_timeStamp}_Tree_{index}.pu");
+                                File.WriteAllText(plantumlPath, plantuml);
+                                index++;
+                            }
+                        }
+                }*/
     }
 
     private string GetConfiguration(string dir, string trainingData,

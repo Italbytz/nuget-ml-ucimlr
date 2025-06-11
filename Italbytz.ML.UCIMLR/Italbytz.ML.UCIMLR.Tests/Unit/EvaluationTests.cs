@@ -1,7 +1,4 @@
-using System.Collections.Generic;
-using System.Reflection;
 using Italbytz.ML.ModelBuilder.Configuration;
-using Italbytz.ML.Trainers;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
@@ -14,6 +11,7 @@ namespace Italbytz.ML.Data.Tests.Unit;
 public class EvaluationTests
 {
     [TestMethod]
+    [TestCategory("CI")]
     public void EvaluateBreastCancerWisconsinDiagnosticOneVersusAllFastTree()
     {
         var data = Data.BreastCancerWisconsinDiagnostic;
@@ -144,45 +142,5 @@ public class EvaluationTests
         var predictions = model.Transform(data.DataView);
         return mlContext.MulticlassClassification.Evaluate(predictions,
             data.LabelColumnName);
-    }
-
-    private IEnumerable<ICanSaveModel> RetrieveModelParameters(
-        ICanSaveModel transformer)
-    {
-        var modelParameters = new List<ICanSaveModel>();
-        if (transformer is IEnumerable<ITransformer> chain)
-        {
-            foreach (var chainItem in chain)
-                modelParameters.AddRange(RetrieveModelParameters(chainItem));
-        }
-        else if (transformer is IPredictionTransformer<ICanSaveModel>
-                 predictionTransformer)
-        {
-            var model = predictionTransformer.Model;
-            modelParameters.Add(model);
-
-            if (model is OneVersusAllModelParameters
-                oneVersusAllModelParameters)
-                modelParameters.Add(oneVersusAllModelParameters.ToPublic());
-
-            var subModelParamsProp = model?.GetType()
-                .GetProperty("SubModelParameters",
-                    BindingFlags.Instance | BindingFlags.NonPublic |
-                    BindingFlags.Public);
-            if (subModelParamsProp != null)
-            {
-                var subModelParams =
-                    subModelParamsProp.GetValue(model) as IEnumerable<object>;
-                if (subModelParams != null)
-                    foreach (var subModel in subModelParams)
-                    {
-                        modelParameters.Add(subModel as ICanSaveModel);
-                        modelParameters.AddRange(
-                            RetrieveModelParameters(subModel as ICanSaveModel));
-                    }
-            }
-        }
-
-        return modelParameters;
     }
 }
