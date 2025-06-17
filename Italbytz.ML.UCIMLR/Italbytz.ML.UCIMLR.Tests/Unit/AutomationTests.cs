@@ -133,14 +133,14 @@ public class AutomationTests
         var metrics = Simulate(data, ScenarioType.Classification,
             ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
             _seeds, 60, 0.2f);
-        var rSquared = metrics.Select(m =>
+        var accuracies = metrics.Select(m =>
             m.MacroAccuracy.ToString(CultureInfo.InvariantCulture));
         LogWriter.Close();
         File.WriteAllLines(
             "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/WineQuality/AutoML.csv",
-            rSquared);
+            accuracies);
         Console.WriteLine(
-            string.Join(',', rSquared));
+            string.Join(',', accuracies));
     }
 
     [TestMethod]
@@ -150,14 +150,14 @@ public class AutomationTests
         var metrics = Simulate(data, ScenarioType.Regression,
             ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
             _seeds, 60, 0.2f);
-        var accuracies = metrics.Select(m =>
+        var rSquared = metrics.Select(m =>
             m.RSquared.ToString(CultureInfo.InvariantCulture));
         LogWriter.Close();
         File.WriteAllLines(
             "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/WineQuality/AutoMLRegression.csv",
-            accuracies);
+            rSquared);
         Console.WriteLine(
-            string.Join(',', accuracies));
+            string.Join(',', rSquared));
     }
 
     [TestMethod]
@@ -233,7 +233,14 @@ public class AutomationTests
                 $"{metricForCSV}");
 
             LogWriter?.Flush();
+            var modelPath = Path.Combine(tmpDir,
+                "config.mlnet");
+            var metricPercentage = (int)(metricForCSV * 100);
+            var saveModelPath = Path.Combine(tmpDir,
+                $"{dataset.FilePrefix}_{_timeStamp}_{metricPercentage}_Model.mlnet");
+            File.Copy(modelPath, saveModelPath, true);
         }
+
 
         return metrics;
     }
@@ -325,8 +332,8 @@ public class AutomationTests
                 }
             }
 
-            ExplainModel(tmpDir, dataset.FilePrefix, modelParameters,
-                confusionMatrix, pfiTable);
+            /*ExplainModel(tmpDir, dataset.FilePrefix, modelParameters,
+                confusionMatrix, pfiTable);*/
         }
         catch (Exception e)
         {
