@@ -47,7 +47,7 @@ public class AutomationTests
             ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
             _seeds, 60, 0.2f);
         var accuracies = metrics.Select(m =>
-            m.MacroAccuracy.ToString(CultureInfo.InvariantCulture));
+            m.F1Score.ToString(CultureInfo.InvariantCulture));
         File.WriteAllLines(
             "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/Iris/AutoML.csv",
             accuracies);
@@ -73,7 +73,7 @@ public class AutomationTests
             ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
             _seeds, 60, 0.2f);
         var accuracies = metrics.Select(m =>
-            m.MacroAccuracy.ToString(CultureInfo.InvariantCulture));
+            m.F1Score.ToString(CultureInfo.InvariantCulture));
         LogWriter.Close();
         File.WriteAllLines(
             "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/HeartDisease/AutoML.csv",
@@ -132,7 +132,7 @@ public class AutomationTests
         var data = Data.WineQuality;
         var metrics = Simulate(data, ScenarioType.Classification,
             ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
-            _seeds, 60, 0.2f);
+            _seeds, 60, 0.1f);
         var accuracies = metrics.Select(m =>
             m.MacroAccuracy.ToString(CultureInfo.InvariantCulture));
         LogWriter.Close();
@@ -149,7 +149,7 @@ public class AutomationTests
         var data = Data.WineQuality;
         var metrics = Simulate(data, ScenarioType.Regression,
             ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
-            _seeds, 60, 0.2f);
+            _seeds, 60, 0.1f);
         var rSquared = metrics.Select(m =>
             m.RSquared.ToString(CultureInfo.InvariantCulture));
         LogWriter.Close();
@@ -222,15 +222,13 @@ public class AutomationTests
             metrics.Add(metric);
             var metricForCSV = scenario switch
             {
-                ScenarioType.Classification => metric.IsBinaryClassification
-                    ? metric.F1Score
-                    : metric.MacroAccuracy,
+                ScenarioType.Classification => metric.F1Score,
                 ScenarioType.Regression => metric.RSquared,
                 _ => throw new ArgumentOutOfRangeException(nameof(scenario),
                     scenario, null)
             };
             LogWriter?.WriteLine(
-                $"{metricForCSV}");
+                metricForCSV.ToString(CultureInfo.InvariantCulture));
 
             LogWriter?.Flush();
             var modelPath = Path.Combine(tmpDir,
@@ -238,7 +236,7 @@ public class AutomationTests
             var metricPercentage = (int)(metricForCSV * 100);
             var saveModelPath = Path.Combine(tmpDir,
                 $"{dataset.FilePrefix}_{_timeStamp}_{metricPercentage}_Model.mlnet");
-            File.Copy(modelPath, saveModelPath, true);
+            //File.Copy(modelPath, saveModelPath, true);
         }
 
 
@@ -303,7 +301,8 @@ public class AutomationTests
                     {
                         IsMulticlassClassification = true,
                         Accuracy = multiclassMetrics.MicroAccuracy,
-                        MacroAccuracy = multiclassMetrics.MacroAccuracy
+                        MacroAccuracy = multiclassMetrics.MacroAccuracy,
+                        F1Score = multiclassMetrics.F1Macro()
                     };
                 }
                 catch (Exception e2)
