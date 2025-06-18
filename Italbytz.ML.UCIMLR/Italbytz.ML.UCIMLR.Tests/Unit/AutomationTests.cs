@@ -134,7 +134,7 @@ public class AutomationTests
             ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
             _seeds, 60, 0.1f);
         var accuracies = metrics.Select(m =>
-            m.MacroAccuracy.ToString(CultureInfo.InvariantCulture));
+            m.F1Score.ToString(CultureInfo.InvariantCulture));
         LogWriter.Close();
         File.WriteAllLines(
             "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/WineQuality/AutoML.csv",
@@ -150,14 +150,27 @@ public class AutomationTests
         var metrics = Simulate(data, ScenarioType.Regression,
             ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
             _seeds, 60, 0.1f);
+        LogWriter.Close();
         var rSquared = metrics.Select(m =>
             m.RSquared.ToString(CultureInfo.InvariantCulture));
-        LogWriter.Close();
         File.WriteAllLines(
-            "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/WineQuality/AutoMLRegression.csv",
+            "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/WineQuality/AutoMLRegressionR2.csv",
             rSquared);
-        Console.WriteLine(
-            string.Join(',', rSquared));
+        var meanAbsoluteError = metrics.Select(m =>
+            m.MeanAbsoluteError.ToString(CultureInfo.InvariantCulture));
+        File.WriteAllLines(
+            "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/WineQuality/AutoMLRegressionMAE.csv",
+            meanAbsoluteError);
+        var meanSquaredError = metrics.Select(m =>
+            m.MeanSquaredError.ToString(CultureInfo.InvariantCulture));
+        File.WriteAllLines(
+            "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/WineQuality/AutoMLRegressionMSE.csv",
+            meanSquaredError);
+        var rootMeanSquaredError = metrics.Select(m =>
+            m.RootMeanSquaredError.ToString(CultureInfo.InvariantCulture));
+        File.WriteAllLines(
+            "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/WineQuality/AutoMLRegressionRMSE.csv",
+            rootMeanSquaredError);
     }
 
     [TestMethod]
