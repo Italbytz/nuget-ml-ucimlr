@@ -192,9 +192,9 @@ public class AutomationTests
         var data = Data.Adult;
         var metrics = Simulate(data, ScenarioType.Classification,
             ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
-            _seeds, 60, 0.2f, true);
+            _seeds, 60, 0.05f, true);
         var accuracies = metrics.Select(m =>
-            m.MacroAccuracy.ToString(CultureInfo.InvariantCulture));
+            m.F1Score.ToString(CultureInfo.InvariantCulture));
         LogWriter.Close();
         File.WriteAllLines(
             "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/Adult/AutoMLBinary.csv",
