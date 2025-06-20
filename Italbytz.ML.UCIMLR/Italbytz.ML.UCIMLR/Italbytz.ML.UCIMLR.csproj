@@ -64,6 +64,10 @@
         <EmbeddedResource Include="Data\Student_Performance_G3.csv">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </EmbeddedResource>
+        <None Remove="Data\Automobile.csv"/>
+        <EmbeddedResource Include="Data\Automobile.csv">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </EmbeddedResource>
     </ItemGroup>
     <ItemGroup>
         <None Include="../../docfx/docs/introduction.md" Pack="true" PackagePath="\"/>

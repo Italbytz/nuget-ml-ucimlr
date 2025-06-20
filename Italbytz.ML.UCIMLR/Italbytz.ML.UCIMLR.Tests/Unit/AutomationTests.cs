@@ -21,6 +21,7 @@ namespace Italbytz.ML.Data.Tests.Unit;
 [TestClass]
 public class AutomationTests
 {
+    /*
     private readonly int[] _seeds =
     [
         42, 7, 13, 99, 256, 1024, 73, 3, 17, 23,
@@ -34,10 +35,24 @@ public class AutomationTests
         397, 401, 409, 419, 421, 431, 433, 439, 443, 449,
         457, 461, 463, 467, 479, 487, 491, 499, 503, 509
     ];
+    */
+
+    private readonly int[] _seeds =
+    [
+        79, 83, 89, 97, 101, 103,
+        107, 109, 113, 127, 131, 137, 139, 149, 151, 157,
+        163, 167, 173, 179, 181, 191, 193, 197, 199, 211,
+        223, 227, 229, 233, 239, 241, 251, 257, 263, 269,
+        271, 277, 281, 283, 293, 307, 311, 313, 317, 331,
+        337, 347, 349, 353, 359, 367, 373, 379, 383, 389,
+        397, 401, 409, 419, 421, 431, 433, 439, 443, 449,
+        457, 461, 463, 467, 479, 487, 491, 499, 503, 509
+    ];
 
     private string _timeStamp;
 
     private StreamWriter LogWriter { get; set; }
+    private StreamWriter SeedWriter { get; set; }
 
     [TestMethod]
     public void SimulateIrisClassification()
@@ -63,6 +78,7 @@ public class AutomationTests
             ["FASTTREE"],
             _seeds, 60, 0.2f);
         LogWriter.Close();
+        SeedWriter.Close();
     }
 
     [TestMethod]
@@ -75,6 +91,7 @@ public class AutomationTests
         var accuracies = metrics.Select(m =>
             m.F1Score.ToString(CultureInfo.InvariantCulture));
         LogWriter.Close();
+        SeedWriter.Close();
         File.WriteAllLines(
             "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/HeartDisease/AutoML.csv",
             accuracies);
@@ -90,6 +107,7 @@ public class AutomationTests
             ["FASTTREE"],
             _seeds, 60, 0.2f, true);
         LogWriter.Close();
+        SeedWriter.Close();
     }
 
     [TestMethod]
@@ -102,6 +120,7 @@ public class AutomationTests
         var accuracies = metrics.Select(m =>
             m.F1Score.ToString(CultureInfo.InvariantCulture));
         LogWriter.Close();
+        SeedWriter.Close();
         File.WriteAllLines(
             "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/HeartDisease/AutoMLBinary.csv",
             accuracies);
@@ -119,6 +138,7 @@ public class AutomationTests
         var accuracies = metrics.Select(m =>
             m.F1Score.ToString(CultureInfo.InvariantCulture));
         LogWriter.Close();
+        SeedWriter.Close();
         File.WriteAllLines(
             "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/BreastCancerWisconsinDiagnostic/AutoMLBinary.csv",
             accuracies);
@@ -136,6 +156,7 @@ public class AutomationTests
         var accuracies = metrics.Select(m =>
             m.F1Score.ToString(CultureInfo.InvariantCulture));
         LogWriter.Close();
+        SeedWriter.Close();
         File.WriteAllLines(
             "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/WineQuality/AutoML.csv",
             accuracies);
@@ -151,6 +172,7 @@ public class AutomationTests
             ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
             _seeds, 60, 0.1f);
         LogWriter.Close();
+        SeedWriter.Close();
         var rSquared = metrics.Select(m =>
             m.RSquared.ToString(CultureInfo.InvariantCulture));
         File.WriteAllLines(
@@ -181,10 +203,27 @@ public class AutomationTests
             ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
             _seeds, 60, 0.2f);
         LogWriter.Close();
+        SeedWriter.Close();
         var rSquared = metrics.Select(m =>
             m.RSquared.ToString(CultureInfo.InvariantCulture));
         File.WriteAllLines(
             "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/Student/AutoMLRegressionR2.csv",
+            rSquared);
+    }
+
+    [TestMethod]
+    public void SimulateAutomobileRegression()
+    {
+        var data = Data.Automobile;
+        var metrics = Simulate(data, ScenarioType.Regression,
+            ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
+            _seeds, 60, 0.2f);
+        LogWriter.Close();
+        SeedWriter.Close();
+        var rSquared = metrics.Select(m =>
+            m.RSquared.ToString(CultureInfo.InvariantCulture));
+        File.WriteAllLines(
+            "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/Automobile/AutoMLRegressionR2.csv",
             rSquared);
     }
 
@@ -211,6 +250,7 @@ public class AutomationTests
         var accuracies = metrics.Select(m =>
             m.F1Score.ToString(CultureInfo.InvariantCulture));
         LogWriter.Close();
+        SeedWriter.Close();
         File.WriteAllLines(
             "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/Adult/AutoMLBinary.csv",
             accuracies);
@@ -231,6 +271,9 @@ public class AutomationTests
         LogWriter = new StreamWriter(logPath);
         LogWriter.WriteLine(
             "\"x\"");
+        var seedPath = Path.Combine(tmpDir,
+            $"{dataset.FilePrefix}_{_timeStamp}_Seeds.csv");
+        SeedWriter = new StreamWriter(seedPath);
 
         var files =
             dataset.GetTrainValidateTestFiles(tmpDir,
@@ -259,6 +302,8 @@ public class AutomationTests
                 metricForCSV.ToString(CultureInfo.InvariantCulture));
 
             LogWriter?.Flush();
+            SeedWriter?.WriteLine(file.TestFileName);
+            SeedWriter?.Flush();
             var modelPath = Path.Combine(tmpDir,
                 "config.mlnet");
             var metricPercentage = (int)(metricForCSV * 100);

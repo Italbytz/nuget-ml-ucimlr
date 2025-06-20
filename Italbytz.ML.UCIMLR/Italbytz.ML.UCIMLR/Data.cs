@@ -9,6 +9,10 @@ public static class Data
     private static IDataset? _heartDiseaseBinary;
     private static IDataset? _adult;
     private static IDataset? _studentPerformance;
+    private static IDataset? _automobile;
+
+    public static IDataset Automobile =>
+        _automobile ??= new AutomobileDataset();
 
     public static IDataset StudentPerformance =>
         _studentPerformance ??= new StudentPerformanceDataset();
