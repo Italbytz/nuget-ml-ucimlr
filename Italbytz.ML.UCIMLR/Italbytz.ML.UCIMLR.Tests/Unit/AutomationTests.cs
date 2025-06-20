@@ -174,6 +174,21 @@ public class AutomationTests
     }
 
     [TestMethod]
+    public void SimulateStudentPerformanceRegression()
+    {
+        var data = Data.StudentPerformance;
+        var metrics = Simulate(data, ScenarioType.Regression,
+            ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
+            _seeds, 60, 0.2f);
+        LogWriter.Close();
+        var rSquared = metrics.Select(m =>
+            m.RSquared.ToString(CultureInfo.InvariantCulture));
+        File.WriteAllLines(
+            "/Users/nunkesser/repos/work/articles/logicgp/data/ucimlrepo/Student/AutoMLRegressionR2.csv",
+            rSquared);
+    }
+
+    [TestMethod]
     public void SimulateBreastCancerWisconsinDiagnosticClassification()
     {
         var data = Data.BreastCancerWisconsinDiagnostic;

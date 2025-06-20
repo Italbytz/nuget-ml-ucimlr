@@ -8,6 +8,10 @@ public static class Data
     private static IDataset? _heartDisease;
     private static IDataset? _heartDiseaseBinary;
     private static IDataset? _adult;
+    private static IDataset? _studentPerformance;
+
+    public static IDataset StudentPerformance =>
+        _studentPerformance ??= new StudentPerformanceDataset();
 
     public static IDataset Iris => _iris ??= new IrisDataset();
 
@@ -25,5 +29,5 @@ public static class Data
         _heartDiseaseBinary ??= new HeartDiseaseBinaryDataset();
 
     public static IDataset Adult =>
-        _adult ??= new AdultDataset();
+        _adult ??= new AdultIncomeDataset();
 }

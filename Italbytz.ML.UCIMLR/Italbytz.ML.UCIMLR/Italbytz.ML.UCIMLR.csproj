@@ -48,6 +48,22 @@
         <EmbeddedResource Include="Data\Adult.csv">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </EmbeddedResource>
+        <None Remove="Data\Student_Performance.csv"/>
+        <EmbeddedResource Include="Data\Student_Performance.csv">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </EmbeddedResource>
+        <None Remove="Data\Student_Performance_G1.csv"/>
+        <EmbeddedResource Include="Data\Student_Performance_G1.csv">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </EmbeddedResource>
+        <None Remove="Data\Student_Performance_G2.csv"/>
+        <EmbeddedResource Include="Data\Student_Performance_G2.csv">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </EmbeddedResource>
+        <None Remove="Data\Student_Performance_G3.csv"/>
+        <EmbeddedResource Include="Data\Student_Performance_G3.csv">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </EmbeddedResource>
     </ItemGroup>
     <ItemGroup>
         <None Include="../../docfx/docs/introduction.md" Pack="true" PackagePath="\"/>

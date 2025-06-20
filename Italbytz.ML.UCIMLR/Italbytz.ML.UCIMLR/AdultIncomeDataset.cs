@@ -4,7 +4,7 @@ using Microsoft.ML.Data;
 
 namespace Italbytz.ML.Data;
 
-public class AdultDataset : Dataset<AdultDataset.AdultModelInput>
+public class AdultIncomeDataset : Dataset<AdultIncomeDataset.AdultModelInput>
 {
     protected override string ResourceName { get; } =
         "Italbytz.ML.UCIMLR.Data.Adult.csv";
