@@ -68,6 +68,26 @@
         <EmbeddedResource Include="Data\Automobile.csv">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </EmbeddedResource>
+        <None Remove="Data\lenses.csv"/>
+        <EmbeddedResource Include="Data\lenses.csv">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </EmbeddedResource>
+        <None Remove="Data\national_poll_on_healthy_aging_npha.csv"/>
+        <EmbeddedResource Include="Data\national_poll_on_healthy_aging_npha.csv">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </EmbeddedResource>
+        <None Remove="Data\solarflare_1.csv"/>
+        <EmbeddedResource Include="Data\solarflare_1.csv">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </EmbeddedResource>
+        <None Remove="Data\car_evaluation_strings.csv"/>
+        <EmbeddedResource Include="Data\car_evaluation_strings.csv">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </EmbeddedResource>
+        <None Remove="Data\balancescale.csv"/>
+        <EmbeddedResource Include="Data\balancescale.csv">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </EmbeddedResource>
     </ItemGroup>
     <ItemGroup>
         <None Include="../../docfx/docs/introduction.md" Pack="true" PackagePath="\"/>
