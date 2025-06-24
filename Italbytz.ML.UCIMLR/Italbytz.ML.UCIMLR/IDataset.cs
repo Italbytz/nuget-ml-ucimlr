@@ -1,4 +1,3 @@
-using Italbytz.ML.Data;
 using Italbytz.ML.ModelBuilder.Configuration;
 using Microsoft.ML;
 
@@ -22,7 +21,8 @@ public interface IDataset
     );
 
     public IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
-        ScenarioType scenarioType, IEstimator<ITransformer> estimator);
+        ScenarioType scenarioType, IEstimator<ITransformer> estimator,
+        bool custom = false);
 
     protected IDataView LoadFromTextFile<TModelInput>(
         string path,

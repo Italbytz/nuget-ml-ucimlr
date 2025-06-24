@@ -1,6 +1,5 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Italbytz.ML.Data;
 using Italbytz.ML.ModelBuilder.Configuration;
 using Microsoft.ML;
 
@@ -34,7 +33,8 @@ public abstract class Dataset<TModelInput> : IDataset
     }
 
     public abstract IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
-        ScenarioType scenarioType, IEstimator<ITransformer> estimator);
+        ScenarioType scenarioType, IEstimator<ITransformer> estimator,
+        bool custom = false);
 
     public abstract IDataView LoadFromTextFile(string path,
         char separatorChar = IDataset.TextLoaderDefaults.Separator,

@@ -269,7 +269,7 @@ public class StudentPerformanceDataset : Dataset<
 
     public override IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
         ScenarioType scenarioType,
-        IEstimator<ITransformer> estimator)
+        IEstimator<ITransformer> estimator, bool custom = false)
     {
         var pipeline = mlContext.Transforms.Categorical.OneHotEncoding(
                 new[]

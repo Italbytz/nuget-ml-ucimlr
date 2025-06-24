@@ -6,6 +6,13 @@ namespace Italbytz.ML.Data;
 
 public class IrisDataset : Dataset<IrisDataset.IrisModelInput>
 {
+    private readonly LookupMap<string>[] _lookupData =
+    [
+        new("Iris-setosa"),
+        new("Iris-versicolor"),
+        new("Iris-virginica")
+    ];
+
     protected override string ResourceName { get; } =
         "Italbytz.ML.UCIMLR.Data.Iris.csv";
 
@@ -59,29 +66,65 @@ public class IrisDataset : Dataset<IrisDataset.IrisModelInput>
         """;
 
     public override IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
-        ScenarioType scenarioType, IEstimator<ITransformer> trainer)
+        ScenarioType scenarioType, IEstimator<ITransformer> trainer,
+        bool custom = false)
     {
         if (scenarioType == ScenarioType.Classification)
         {
-            var pipeline = mlContext.Transforms.ReplaceMissingValues(new[]
-                {
-                    new InputOutputColumnPair(@"sepal length", @"sepal length"),
-                    new InputOutputColumnPair(@"sepal width", @"sepal width"),
-                    new InputOutputColumnPair(@"petal length", @"petal length"),
-                    new InputOutputColumnPair(@"petal width", @"petal width")
-                })
-                .Append(mlContext.Transforms.Concatenate(@"Features",
-                    @"sepal length", @"sepal width", @"petal length",
-                    @"petal width"))
-                .Append(mlContext.Transforms.Conversion.MapValueToKey(@"class",
-                    @"class", addKeyValueAnnotationsAsText: false))
-                .Append(
-                    trainer)
-                .Append(
-                    mlContext.Transforms.Conversion.MapKeyToValue(
-                        @"PredictedLabel", @"PredictedLabel"));
+            var preprocessing = mlContext.Transforms.ReplaceMissingValues(new[]
+            {
+                new InputOutputColumnPair(@"sepal length",
+                    @"sepal length"),
+                new InputOutputColumnPair(@"sepal width",
+                    @"sepal width"),
+                new InputOutputColumnPair(@"petal length",
+                    @"petal length"),
+                new InputOutputColumnPair(@"petal width",
+                    @"petal width")
+            });
+            if (!custom)
+            {
+                var pipeline = preprocessing
+                    .Append(mlContext.Transforms.Concatenate(@"Features",
+                        @"sepal length", @"sepal width", @"petal length",
+                        @"petal width"))
+                    .Append(mlContext.Transforms.Conversion.MapValueToKey(
+                        @"class",
+                        @"class", addKeyValueAnnotationsAsText: false))
+                    .Append(
+                        trainer)
+                    .Append(
+                        mlContext.Transforms.Conversion.MapKeyToValue(
+                            @"PredictedLabel", @"PredictedLabel"));
 
-            return pipeline;
+                return pipeline;
+            }
+            else
+            {
+                var lookupIdvMap =
+                    mlContext.Data.LoadFromEnumerable(_lookupData);
+                var pipeline = preprocessing
+                    .Append(mlContext.Transforms.NormalizeBinning(new[]
+                    {
+                        new InputOutputColumnPair(@"sepal length",
+                            @"sepal length"),
+                        new InputOutputColumnPair(@"sepal width",
+                            @"sepal width"),
+                        new InputOutputColumnPair(@"petal length",
+                            @"petal length"),
+                        new InputOutputColumnPair(@"petal width",
+                            @"petal width")
+                    }, maximumBinCount: 4))
+                    .Append(mlContext.Transforms.Concatenate(@"Features",
+                        @"sepal length", @"sepal width", @"petal length",
+                        @"petal width"))
+                    .Append(mlContext.Transforms.Conversion.MapValueToKey(
+                        @"Label",
+                        @"class", keyData: lookupIdvMap))
+                    .Append(trainer);
+
+                return pipeline;
+            }
         }
 
         throw new NotSupportedException(

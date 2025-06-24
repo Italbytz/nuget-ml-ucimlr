@@ -8,7 +8,7 @@ public class NPHADataset : Dataset<NPHADataset.NationalPollModelInput>
 {
     public override IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
         ScenarioType scenarioType,
-        IEstimator<ITransformer> estimator)
+        IEstimator<ITransformer> estimator, bool custom = false)
     {
         throw new NotImplementedException();
     }
