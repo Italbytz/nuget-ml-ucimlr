@@ -10,6 +10,26 @@ public static class Data
     private static IDataset? _adult;
     private static IDataset? _studentPerformance;
     private static IDataset? _automobile;
+    private static IDataset? _balanceScale;
+    private static IDataset? _carEvaluation;
+    private static IDataset? _lenses;
+    private static IDataset? _npha;
+    private static IDataset? _solarflare1;
+
+    public static IDataset SolarFlare1 =>
+        _solarflare1 ??= new SolarFlareDataset();
+
+    public static IDataset NPHA =>
+        _npha ??= new NPHADataset();
+
+    public static IDataset Lenses =>
+        _lenses ??= new LensesDataset();
+
+    public static IDataset CarEvaluation =>
+        _carEvaluation ??= new CarEvaluationDataset();
+
+    public static IDataset BalanceScale =>
+        _balanceScale ??= new BalanceScaleDataset();
 
     public static IDataset Automobile =>
         _automobile ??= new AutomobileDataset();
