@@ -6,6 +6,14 @@ namespace Italbytz.ML.Data;
 
 public class NPHADataset : Dataset<NPHADataset.NationalPollModelInput>
 {
+    protected override string ResourceName { get; } =
+        "Italbytz.ML.UCIMLR.Data.national_poll_on_healthy_aging_npha.csv";
+
+    public override string FilePrefix { get; } = "npha";
+
+    public override string? LabelColumnName { get; } =
+        @"Number_of_Doctors_Visited";
+
     public override IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
         ScenarioType scenarioType,
         IEstimator<ITransformer> estimator, bool custom = false)

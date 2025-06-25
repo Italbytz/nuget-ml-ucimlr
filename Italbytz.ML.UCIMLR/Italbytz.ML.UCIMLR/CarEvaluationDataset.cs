@@ -7,6 +7,13 @@ namespace Italbytz.ML.Data;
 public class
     CarEvaluationDataset : Dataset<CarEvaluationDataset.CarEvaluationModelInput>
 {
+    protected override string ResourceName { get; } =
+        "Italbytz.ML.UCIMLR.Data.car_evaluation_strings.csv";
+
+    public override string FilePrefix { get; } = "carevaluation";
+
+    public override string? LabelColumnName { get; } = @"class";
+
     public override IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
         ScenarioType scenarioType,
         IEstimator<ITransformer> estimator, bool custom = false)

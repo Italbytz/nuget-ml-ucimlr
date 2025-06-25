@@ -7,6 +7,13 @@ namespace Italbytz.ML.Data;
 public class
     BalanceScaleDataset : Dataset<BalanceScaleDataset.BalanceScaleModelInput>
 {
+    protected override string ResourceName { get; } =
+        "Italbytz.ML.UCIMLR.Data.balancescale.csv";
+
+    public override string FilePrefix { get; } = "balancescale";
+
+    public override string? LabelColumnName { get; } = @"class";
+
     public override IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
         ScenarioType scenarioType,
         IEstimator<ITransformer> estimator, bool custom = false)

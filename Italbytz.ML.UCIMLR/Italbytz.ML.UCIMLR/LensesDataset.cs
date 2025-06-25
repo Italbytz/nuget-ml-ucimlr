@@ -6,6 +6,13 @@ namespace Italbytz.ML.Data;
 
 public class LensesDataset : Dataset<LensesDataset.LensesModelInput>
 {
+    protected override string ResourceName { get; } =
+        "Italbytz.ML.UCIMLR.Data.lenses.csv";
+
+    public override string FilePrefix { get; } = "lenses";
+
+    public override string? LabelColumnName { get; } = @"class";
+
     public override IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
         ScenarioType scenarioType,
         IEstimator<ITransformer> estimator, bool custom = false)

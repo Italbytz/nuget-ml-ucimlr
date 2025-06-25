@@ -6,6 +6,14 @@ namespace Italbytz.ML.Data;
 
 public class SolarFlareDataset : Dataset<SolarFlareDataset.SolarflareModelInput>
 {
+    protected override string ResourceName { get; } =
+        "Italbytz.ML.UCIMLR.Data.solarflare_1.csv";
+
+    public override string FilePrefix { get; } = "solarflare";
+
+    public override string? LabelColumnName { get; } =
+        @"flares";
+
     public override IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
         ScenarioType scenarioType,
         IEstimator<ITransformer> estimator, bool custom = false)
