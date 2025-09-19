@@ -1,3 +1,6 @@
+using System;
+using System.Globalization;
+using System.Linq;
 using Italbytz.ML.ModelBuilder.Configuration;
 using Microsoft.ML;
 using Microsoft.ML.Data;
@@ -140,7 +143,24 @@ public class EvaluationTests
             ScenarioType.Classification, trainer);
         var model = pipeline.Fit(data.DataView);
         var predictions = model.Transform(data.DataView);
+        //PrintFeaturesAndLabels(predictions);
         return mlContext.MulticlassClassification.Evaluate(predictions,
             data.LabelColumnName);
+    }
+
+    private void PrintFeaturesAndLabels(IDataView predictions)
+    {
+        var excerpt = predictions.GetDataExcerpt("class");
+        var features = excerpt.Features;
+        var labels = excerpt.Labels;
+        Console.WriteLine("private readonly float[][] _features = [");
+        foreach (var feature in features)
+            Console.WriteLine(
+                $"    [ {string.Join(", ", feature.Select(f => f.ToString("F6", CultureInfo.InvariantCulture) + "f"))} ],");
+        Console.WriteLine("];");
+
+        Console.WriteLine("private readonly string[] _labels = [");
+        foreach (var label in labels) Console.WriteLine($"    \"{label}\",");
+        Console.WriteLine("];");
     }
 }
