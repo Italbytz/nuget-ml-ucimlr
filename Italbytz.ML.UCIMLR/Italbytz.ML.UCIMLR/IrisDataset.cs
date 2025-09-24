@@ -13,6 +13,10 @@ public class IrisDataset : Dataset<IrisDataset.IrisModelInput>
         new("Iris-virginica")
     ];
 
+    public override bool HasHeader { get; } = true;
+
+    public override char Separator { get; } = ',';
+
     protected override string ResourceName { get; } =
         "Italbytz.ML.UCIMLR.Data.Iris.csv";
 

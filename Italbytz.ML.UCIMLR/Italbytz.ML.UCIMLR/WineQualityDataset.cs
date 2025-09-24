@@ -7,6 +7,10 @@ namespace Italbytz.ML.Data;
 public class
     WineQualityDataset : Dataset<WineQualityDataset.WineQualityModelInput>
 {
+    public override bool HasHeader { get; } = true;
+
+    public override char Separator { get; } = ',';
+
     protected override string ResourceName { get; } =
         "Italbytz.ML.UCIMLR.Data.Wine_Quality.csv";
 

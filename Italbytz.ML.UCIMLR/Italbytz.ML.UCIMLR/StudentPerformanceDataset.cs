@@ -7,6 +7,10 @@ namespace Italbytz.ML.Data;
 public class StudentPerformanceDataset : Dataset<
     StudentPerformanceDataset.StudentPerformanceModelInput>
 {
+    public override bool HasHeader { get; } = true;
+
+    public override char Separator { get; } = ',';
+
     protected override string ResourceName { get; } =
         "Italbytz.ML.UCIMLR.Data.Student_Performance_G3.csv";
 

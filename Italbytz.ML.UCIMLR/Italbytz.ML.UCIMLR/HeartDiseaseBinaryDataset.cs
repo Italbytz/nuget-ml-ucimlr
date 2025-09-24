@@ -8,6 +8,10 @@ public class
     HeartDiseaseBinaryDataset : Dataset<
     HeartDiseaseBinaryDataset.HeartDiseaseModelInput>
 {
+    public override bool HasHeader { get; } = true;
+
+    public override char Separator { get; } = ',';
+
     protected override string ColumnPropertiesString { get; } = """
         [
           {

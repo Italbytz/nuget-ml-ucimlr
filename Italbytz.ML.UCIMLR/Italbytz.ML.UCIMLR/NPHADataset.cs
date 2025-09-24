@@ -13,6 +13,10 @@ public class NPHADataset : Dataset<NPHADataset.NationalPollModelInput>
         new(3.0f)
     ];
 
+    public override bool HasHeader { get; } = true;
+
+    public override char Separator { get; } = ',';
+
     protected override string ResourceName { get; } =
         "Italbytz.ML.UCIMLR.Data.national_poll_on_healthy_aging_npha.csv";
 

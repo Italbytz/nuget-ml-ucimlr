@@ -6,6 +6,10 @@ namespace Italbytz.ML.Data;
 
 public class LensesDataset : Dataset<LensesDataset.LensesModelInput>
 {
+    public override bool HasHeader { get; } = true;
+
+    public override char Separator { get; } = ',';
+
     protected override string ResourceName { get; } =
         "Italbytz.ML.UCIMLR.Data.lenses.csv";
 

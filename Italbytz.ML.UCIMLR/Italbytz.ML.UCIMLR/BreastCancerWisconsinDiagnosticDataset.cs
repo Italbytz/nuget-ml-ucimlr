@@ -8,6 +8,10 @@ public class BreastCancerWisconsinDiagnosticDataset : Dataset<
     BreastCancerWisconsinDiagnosticDataset.
     BreastCancerWisconsinDiagnosticModelInput>
 {
+    public override bool HasHeader { get; } = true;
+
+    public override char Separator { get; } = ',';
+
     protected override string ResourceName { get; } =
         "Italbytz.ML.UCIMLR.Data.Breast_Cancer_Wisconsin_Diagnostic_.csv";
 

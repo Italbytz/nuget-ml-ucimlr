@@ -7,6 +7,10 @@ namespace Italbytz.ML.Data;
 public class
     HeartDiseaseDataset : Dataset<HeartDiseaseDataset.HeartDiseaseModelInput>
 {
+    public override bool HasHeader { get; } = true;
+
+    public override char Separator { get; } = ',';
+
     protected override string ColumnPropertiesString { get; } = """
         [
           {

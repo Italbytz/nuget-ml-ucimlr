@@ -12,6 +12,16 @@ public interface IDataset
 
     public string FilePrefix { get; }
 
+    public bool AllowQuoting { get; }
+    public bool AllowSparse { get; }
+    public char Separator { get; }
+    public char DecimalMarker { get; }
+    public bool HasHeader { get; }
+    public bool TrimWhitespace { get; }
+    public bool ReadMultilines { get; }
+    public char EscapeChar { get; }
+    public bool MissingRealsAsNaNs { get; }
+
     public IEnumerable<TrainValidateTestFileNames> GetTrainValidateTestFiles(
         string saveFolderPath,
         string? samplingKeyColumnName = null,
@@ -50,17 +60,4 @@ public interface IDataset
         bool? allowQuoting = null,
         bool? trimWhitespace = null,
         bool? allowSparse = null);
-
-    internal static class TextLoaderDefaults
-    {
-        internal const bool AllowQuoting = false;
-        internal const bool AllowSparse = false;
-        internal const char Separator = '\t';
-        internal const char DecimalMarker = '.';
-        internal const bool HasHeader = false;
-        internal const bool TrimWhitespace = false;
-        internal const bool ReadMultilines = false;
-        internal const char EscapeChar = '"';
-        internal const bool MissingRealsAsNaNs = false;
-    }
 }

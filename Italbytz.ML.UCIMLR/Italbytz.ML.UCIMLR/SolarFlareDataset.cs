@@ -6,6 +6,10 @@ namespace Italbytz.ML.Data;
 
 public class SolarFlareDataset : Dataset<SolarFlareDataset.SolarflareModelInput>
 {
+    public override bool HasHeader { get; } = true;
+
+    public override char Separator { get; } = ',';
+
     protected override string ResourceName { get; } =
         "Italbytz.ML.UCIMLR.Data.solarflare_1.csv";
 

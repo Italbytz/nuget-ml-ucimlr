@@ -7,6 +7,10 @@ namespace Italbytz.ML.Data;
 public class
     CarEvaluationDataset : Dataset<CarEvaluationDataset.CarEvaluationModelInput>
 {
+    public override bool HasHeader { get; } = true;
+
+    public override char Separator { get; } = ',';
+
     protected override string ResourceName { get; } =
         "Italbytz.ML.UCIMLR.Data.car_evaluation_strings.csv";
 

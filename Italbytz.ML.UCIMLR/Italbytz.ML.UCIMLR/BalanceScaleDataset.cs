@@ -7,6 +7,10 @@ namespace Italbytz.ML.Data;
 public class
     BalanceScaleDataset : Dataset<BalanceScaleDataset.BalanceScaleModelInput>
 {
+    public override bool HasHeader { get; } = true;
+
+    public override char Separator { get; } = ',';
+
     protected override string ResourceName { get; } =
         "Italbytz.ML.UCIMLR.Data.balancescale.csv";
 
