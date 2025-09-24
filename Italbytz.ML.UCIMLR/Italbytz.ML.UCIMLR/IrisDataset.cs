@@ -65,13 +65,74 @@ public class IrisDataset : Dataset<IrisDataset.IrisModelInput>
         ]
         """;
 
-    public override IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
-        ScenarioType scenarioType, IEstimator<ITransformer> trainer,
-        bool custom = false)
+    public override IDataView LoadFromTextFile(string path,
+        char separatorChar = IDataset.TextLoaderDefaults.Separator,
+        bool hasHeader = IDataset.TextLoaderDefaults.HasHeader,
+        bool allowQuoting = IDataset.TextLoaderDefaults.AllowQuoting,
+        bool trimWhitespace = IDataset.TextLoaderDefaults.TrimWhitespace,
+        bool allowSparse = IDataset.TextLoaderDefaults.AllowSparse)
+    {
+        return LoadFromTextFile<IrisModelInput>(path, separatorChar, hasHeader,
+            allowQuoting, trimWhitespace, allowSparse);
+    }
+
+    public override IEstimator<ITransformer>? BuildLabelMappingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        if (processingType == ProcessingType.Standard)
+            return mlContext.Transforms.Conversion.MapValueToKey(
+                    @"class",
+                    @"class", addKeyValueAnnotationsAsText: false)
+                .Append(mlContext.Transforms.CopyColumns("Label", "class"));
+
+        if (processingType ==
+            ProcessingType.FeatureBinningAndCustomLabelMapping)
+            return mlContext.Transforms.Conversion.MapValueToKey(
+                @"Label",
+                @"class",
+                keyData: mlContext.Data.LoadFromEnumerable(_lookupData));
+
+        throw new NotImplementedException();
+    }
+
+    public override IEstimator<ITransformer>? BuildFeaturizationPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        if (processingType == ProcessingType.Standard)
+            return mlContext.Transforms.Concatenate(@"Features",
+                @"sepal length", @"sepal width", @"petal length",
+                @"petal width");
+
+        if (processingType ==
+            ProcessingType.FeatureBinningAndCustomLabelMapping)
+            return mlContext.Transforms.NormalizeBinning(new[]
+                {
+                    new InputOutputColumnPair(@"sepal length",
+                        @"sepal length"),
+                    new InputOutputColumnPair(@"sepal width",
+                        @"sepal width"),
+                    new InputOutputColumnPair(@"petal length",
+                        @"petal length"),
+                    new InputOutputColumnPair(@"petal width",
+                        @"petal width")
+                }, maximumBinCount: 4)
+                .Append(mlContext.Transforms.Concatenate(@"Features",
+                    @"sepal length", @"sepal width", @"petal length",
+                    @"petal width"));
+        throw new NotImplementedException();
+    }
+
+    public override IEstimator<ITransformer> BuildPreprocessingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
     {
         if (scenarioType == ScenarioType.Classification)
-        {
-            var preprocessing = mlContext.Transforms.ReplaceMissingValues(new[]
+            return mlContext.Transforms.ReplaceMissingValues(new[]
             {
                 new InputOutputColumnPair(@"sepal length",
                     @"sepal length"),
@@ -82,64 +143,26 @@ public class IrisDataset : Dataset<IrisDataset.IrisModelInput>
                 new InputOutputColumnPair(@"petal width",
                     @"petal width")
             });
-            if (!custom)
-            {
-                var pipeline = preprocessing
-                    .Append(mlContext.Transforms.Concatenate(@"Features",
-                        @"sepal length", @"sepal width", @"petal length",
-                        @"petal width"))
-                    .Append(mlContext.Transforms.Conversion.MapValueToKey(
-                        @"class",
-                        @"class", addKeyValueAnnotationsAsText: false))
-                    .Append(
-                        trainer)
-                    .Append(
-                        mlContext.Transforms.Conversion.MapKeyToValue(
-                            @"PredictedLabel", @"PredictedLabel"));
-
-                return pipeline;
-            }
-            else
-            {
-                var lookupIdvMap =
-                    mlContext.Data.LoadFromEnumerable(_lookupData);
-                var pipeline = preprocessing
-                    .Append(mlContext.Transforms.NormalizeBinning(new[]
-                    {
-                        new InputOutputColumnPair(@"sepal length",
-                            @"sepal length"),
-                        new InputOutputColumnPair(@"sepal width",
-                            @"sepal width"),
-                        new InputOutputColumnPair(@"petal length",
-                            @"petal length"),
-                        new InputOutputColumnPair(@"petal width",
-                            @"petal width")
-                    }, maximumBinCount: 4))
-                    .Append(mlContext.Transforms.Concatenate(@"Features",
-                        @"sepal length", @"sepal width", @"petal length",
-                        @"petal width"))
-                    .Append(mlContext.Transforms.Conversion.MapValueToKey(
-                        @"Label",
-                        @"class", keyData: lookupIdvMap))
-                    .Append(trainer);
-
-                return pipeline;
-            }
-        }
 
         throw new NotSupportedException(
             $"The scenario type {scenarioType} is not supported.");
     }
 
-    public override IDataView LoadFromTextFile(string path,
-        char separatorChar = IDataset.TextLoaderDefaults.Separator,
-        bool hasHeader = IDataset.TextLoaderDefaults.HasHeader,
-        bool allowQuoting = IDataset.TextLoaderDefaults.AllowQuoting,
-        bool trimWhitespace = IDataset.TextLoaderDefaults.TrimWhitespace,
-        bool allowSparse = IDataset.TextLoaderDefaults.AllowSparse)
+    public override IEstimator<ITransformer>? BuildLabelRemappingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
     {
-        return LoadFromTextFile<IrisModelInput>(path, separatorChar, hasHeader,
-            allowQuoting, trimWhitespace, allowSparse);
+        if (scenarioType == ScenarioType.Classification)
+        {
+            if (processingType ==
+                ProcessingType.FeatureBinningAndCustomLabelMapping) return null;
+            return mlContext.Transforms.Conversion.MapKeyToValue(
+                @"PredictedLabel", @"PredictedLabel");
+        }
+
+        throw new NotSupportedException(
+            $"The scenario type {scenarioType} is not supported.");
     }
 
     /// <summary>

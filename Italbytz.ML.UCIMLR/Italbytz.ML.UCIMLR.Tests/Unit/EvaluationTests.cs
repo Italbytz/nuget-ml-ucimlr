@@ -1,7 +1,6 @@
 using System;
 using System.Globalization;
 using System.Linq;
-using Italbytz.ML.ModelBuilder.Configuration;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
@@ -140,12 +139,11 @@ public class EvaluationTests
     {
         var mlContext = ThreadSafeMLContext.LocalMLContext;
         var pipeline = data.BuildPipeline(mlContext,
-            ScenarioType.Classification, trainer);
+            trainer);
         var model = pipeline.Fit(data.DataView);
         var predictions = model.Transform(data.DataView);
         //PrintFeaturesAndLabels(predictions);
-        return mlContext.MulticlassClassification.Evaluate(predictions,
-            data.LabelColumnName);
+        return mlContext.MulticlassClassification.Evaluate(predictions);
     }
 
     private void PrintFeaturesAndLabels(IDataView predictions)

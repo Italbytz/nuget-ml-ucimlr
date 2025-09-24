@@ -6,11 +6,11 @@ namespace Italbytz.ML.Data;
 
 public class NPHADataset : Dataset<NPHADataset.NationalPollModelInput>
 {
-    private readonly LookupMap<uint>[] _lookupData =
+    private readonly LookupMap<float>[] _lookupData =
     [
-        new(1),
-        new(2),
-        new(3)
+        new(1.0f),
+        new(2.0f),
+        new(3.0f)
     ];
 
     protected override string ResourceName { get; } =
@@ -21,59 +21,131 @@ public class NPHADataset : Dataset<NPHADataset.NationalPollModelInput>
     public override string? LabelColumnName { get; } =
         @"Number_of_Doctors_Visited";
 
-    public override IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
-        ScenarioType scenarioType,
-        IEstimator<ITransformer> estimator, bool custom = false)
-    {
-        if (scenarioType == ScenarioType.Classification && custom)
-        {
-            var lookupIdvMap =
-                mlContext.Data.LoadFromEnumerable(_lookupData);
-            var pipeline = mlContext.Transforms.ReplaceMissingValues(new[]
-            {
-                new InputOutputColumnPair(@"Age", @"Age"),
-                new InputOutputColumnPair(@"Physical_Health",
-                    @"Physical_Health"),
-                new InputOutputColumnPair(@"Mental_Health", @"Mental_Health"),
-                new InputOutputColumnPair(@"Dental_Health", @"Dental_Health"),
-                new InputOutputColumnPair(@"Employment", @"Employment"),
-                new InputOutputColumnPair(@"Stress_Keeps_Patient_from_Sleeping",
-                    @"Stress_Keeps_Patient_from_Sleeping"),
-                new InputOutputColumnPair(
-                    @"Medication_Keeps_Patient_from_Sleeping",
-                    @"Medication_Keeps_Patient_from_Sleeping"),
-                new InputOutputColumnPair(@"Pain_Keeps_Patient_from_Sleeping",
-                    @"Pain_Keeps_Patient_from_Sleeping"),
-                new InputOutputColumnPair(
-                    @"Bathroom_Needs_Keeps_Patient_from_Sleeping",
-                    @"Bathroom_Needs_Keeps_Patient_from_Sleeping"),
-                new InputOutputColumnPair(@"Uknown_Keeps_Patient_from_Sleeping",
-                    @"Uknown_Keeps_Patient_from_Sleeping"),
-                new InputOutputColumnPair(@"Trouble_Sleeping",
-                    @"Trouble_Sleeping"),
-                new InputOutputColumnPair(@"Prescription_Sleep_Medication",
-                    @"Prescription_Sleep_Medication"),
-                new InputOutputColumnPair(@"Race", @"Race"),
-                new InputOutputColumnPair(@"Gender", @"Gender")
-            })
-            .Append(mlContext.Transforms.Concatenate(@"Features", @"Age",
-                @"Physical_Health", @"Mental_Health", @"Dental_Health",
-                @"Employment", @"Stress_Keeps_Patient_from_Sleeping",
-                @"Medication_Keeps_Patient_from_Sleeping",
-                @"Pain_Keeps_Patient_from_Sleeping",
-                @"Bathroom_Needs_Keeps_Patient_from_Sleeping",
-                @"Uknown_Keeps_Patient_from_Sleeping", @"Trouble_Sleeping",
-                @"Prescription_Sleep_Medication", @"Race", @"Gender"))
-            .Append(mlContext.Transforms.Conversion.MapValueToKey(
-                @"Label", @"Number_of_Doctors_Visited",
-                keyData: lookupIdvMap))
-            .Append(estimator);
+    protected override string ColumnPropertiesString { get; } = """
+        [
+          {
+            "ColumnName": "Age",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "Physical_Health",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "Mental_Health",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "Dental_Health",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": false,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "Employment",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "Stress_Keeps_Patient_from_Sleeping",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "Medication_Keeps_Patient_from_Sleeping",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "Pain_Keeps_Patient_from_Sleeping",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "Bathroom_Needs_Keeps_Patient_from_Sleeping",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "Uknown_Keeps_Patient_from_Sleeping",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "Trouble_Sleeping",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "Prescription_Sleep_Medication",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "Race",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "Gender",
+            "ColumnPurpose": "Feature",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          },
+          {
+            "ColumnName": "Number_of_Doctors_Visited",
+            "ColumnPurpose": "Label",
+            "ColumnDataFormat": "Single",
+            "IsCategorical": true,
+            "Type": "Column",
+            "Version": 5
+          }
+        ]
+        """;
 
-        return pipeline;
-        }
-
-        throw new NotImplementedException();
-    }
 
     public override IDataView LoadFromTextFile(string path,
         char separatorChar = IDataset.TextLoaderDefaults.Separator,
@@ -86,6 +158,106 @@ public class NPHADataset : Dataset<NPHADataset.NationalPollModelInput>
             separatorChar,
             hasHeader,
             allowQuoting, trimWhitespace, allowSparse);
+    }
+
+    public override IEstimator<ITransformer>? BuildFeaturizationPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        if (scenarioType == ScenarioType.Classification)
+            return mlContext.Transforms.Concatenate(@"Features", @"Age",
+                @"Physical_Health", @"Mental_Health", @"Dental_Health",
+                @"Employment", @"Stress_Keeps_Patient_from_Sleeping",
+                @"Medication_Keeps_Patient_from_Sleeping",
+                @"Pain_Keeps_Patient_from_Sleeping",
+                @"Bathroom_Needs_Keeps_Patient_from_Sleeping",
+                @"Uknown_Keeps_Patient_from_Sleeping", @"Trouble_Sleeping",
+                @"Prescription_Sleep_Medication", @"Race", @"Gender");
+        throw new NotImplementedException();
+    }
+
+    public override IEstimator<ITransformer>? BuildLabelMappingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        if (scenarioType == ScenarioType.Classification)
+        {
+            if (processingType ==
+                ProcessingType.FeatureBinningAndCustomLabelMapping)
+                return mlContext.Transforms.Conversion.MapValueToKey(
+                        @"Label", @"Number_of_Doctors_Visited",
+                        keyData: mlContext.Data.LoadFromEnumerable(_lookupData))
+                    .Append(mlContext.Transforms.CopyColumns("Label",
+                        "Number_of_Doctors_Visited"));
+
+            if (processingType == ProcessingType.Standard)
+                return mlContext.Transforms.Conversion.MapValueToKey(
+                    @"Number_of_Doctors_Visited",
+                    @"Number_of_Doctors_Visited",
+                    addKeyValueAnnotationsAsText: false);
+        }
+
+        throw new NotImplementedException();
+    }
+
+    public override IEstimator<ITransformer> BuildPreprocessingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        if (scenarioType == ScenarioType.Classification)
+            return mlContext.Transforms.ReplaceMissingValues(new[]
+            {
+                new InputOutputColumnPair(@"Age", @"Age"),
+                new InputOutputColumnPair(@"Physical_Health",
+                    @"Physical_Health"),
+                new InputOutputColumnPair(@"Mental_Health",
+                    @"Mental_Health"),
+                new InputOutputColumnPair(@"Dental_Health",
+                    @"Dental_Health"),
+                new InputOutputColumnPair(@"Employment", @"Employment"),
+                new InputOutputColumnPair(
+                    @"Stress_Keeps_Patient_from_Sleeping",
+                    @"Stress_Keeps_Patient_from_Sleeping"),
+                new InputOutputColumnPair(
+                    @"Medication_Keeps_Patient_from_Sleeping",
+                    @"Medication_Keeps_Patient_from_Sleeping"),
+                new InputOutputColumnPair(
+                    @"Pain_Keeps_Patient_from_Sleeping",
+                    @"Pain_Keeps_Patient_from_Sleeping"),
+                new InputOutputColumnPair(
+                    @"Bathroom_Needs_Keeps_Patient_from_Sleeping",
+                    @"Bathroom_Needs_Keeps_Patient_from_Sleeping"),
+                new InputOutputColumnPair(
+                    @"Uknown_Keeps_Patient_from_Sleeping",
+                    @"Uknown_Keeps_Patient_from_Sleeping"),
+                new InputOutputColumnPair(@"Trouble_Sleeping",
+                    @"Trouble_Sleeping"),
+                new InputOutputColumnPair(@"Prescription_Sleep_Medication",
+                    @"Prescription_Sleep_Medication"),
+                new InputOutputColumnPair(@"Race", @"Race"),
+                new InputOutputColumnPair(@"Gender", @"Gender")
+            });
+
+        throw new NotImplementedException();
+    }
+
+    public override IEstimator<ITransformer>? BuildLabelRemappingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        if (scenarioType == ScenarioType.Classification)
+        {
+            if (processingType ==
+                ProcessingType.FeatureBinningAndCustomLabelMapping) return null;
+            return mlContext.Transforms.Conversion.MapKeyToValue(
+                @"PredictedLabel", @"PredictedLabel");
+        }
+
+        throw new NotImplementedException();
     }
 
     public class NationalPollModelInput
@@ -144,6 +316,6 @@ public class NPHADataset : Dataset<NPHADataset.NationalPollModelInput>
 
         [LoadColumn(14)]
         [ColumnName(@"Number_of_Doctors_Visited")]
-        public uint Number_of_Doctors_Visited { get; set; }
+        public float Number_of_Doctors_Visited { get; set; }
     }
 }

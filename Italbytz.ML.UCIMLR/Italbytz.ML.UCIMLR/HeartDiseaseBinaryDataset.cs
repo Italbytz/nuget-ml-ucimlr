@@ -132,38 +132,6 @@ public class
 
     public override string? LabelColumnName { get; } = @"num";
 
-    public override IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
-        ScenarioType scenarioType,
-        IEstimator<ITransformer> estimator, bool custom = false)
-    {
-        var pipeline = mlContext.Transforms.ReplaceMissingValues(new[]
-            {
-                new InputOutputColumnPair(@"age", @"age"),
-                new InputOutputColumnPair(@"sex", @"sex"),
-                new InputOutputColumnPair(@"cp", @"cp"),
-                new InputOutputColumnPair(@"trestbps", @"trestbps"),
-                new InputOutputColumnPair(@"chol", @"chol"),
-                new InputOutputColumnPair(@"fbs", @"fbs"),
-                new InputOutputColumnPair(@"restecg", @"restecg"),
-                new InputOutputColumnPair(@"thalach", @"thalach"),
-                new InputOutputColumnPair(@"exang", @"exang"),
-                new InputOutputColumnPair(@"oldpeak", @"oldpeak"),
-                new InputOutputColumnPair(@"slope", @"slope"),
-                new InputOutputColumnPair(@"ca", @"ca"),
-                new InputOutputColumnPair(@"thal", @"thal")
-            })
-            .Append(mlContext.Transforms.Concatenate(@"Features", @"age",
-                @"sex", @"cp", @"trestbps", @"chol", @"fbs", @"restecg",
-                @"thalach", @"exang", @"oldpeak", @"slope", @"ca", @"thal"))
-            .Append(mlContext.Transforms.Conversion.MapValueToKey(@"num",
-                @"num", addKeyValueAnnotationsAsText: false))
-            .Append(estimator)
-            .Append(
-                mlContext.Transforms.Conversion.MapKeyToValue(@"PredictedLabel",
-                    @"PredictedLabel"));
-
-        return pipeline;
-    }
 
     public override IDataView LoadFromTextFile(string path,
         char separatorChar = IDataset.TextLoaderDefaults.Separator,
@@ -177,6 +145,59 @@ public class
             allowQuoting, trimWhitespace, allowSparse);
     }
 
+    public override IEstimator<ITransformer>? BuildFeaturizationPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        return mlContext.Transforms.Concatenate(@"Features", @"age",
+            @"sex", @"cp", @"trestbps", @"chol", @"fbs", @"restecg",
+            @"thalach", @"exang", @"oldpeak", @"slope", @"ca", @"thal");
+    }
+
+    public override IEstimator<ITransformer>? BuildLabelMappingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        return mlContext.Transforms.Conversion.MapValueToKey(@"num",
+                @"num", addKeyValueAnnotationsAsText: false)
+            .Append(mlContext.Transforms.CopyColumns("Label", "num"));
+    }
+
+    public override IEstimator<ITransformer> BuildPreprocessingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        var pipeline = mlContext.Transforms.ReplaceMissingValues(new[]
+        {
+            new InputOutputColumnPair(@"age", @"age"),
+            new InputOutputColumnPair(@"sex", @"sex"),
+            new InputOutputColumnPair(@"cp", @"cp"),
+            new InputOutputColumnPair(@"trestbps", @"trestbps"),
+            new InputOutputColumnPair(@"chol", @"chol"),
+            new InputOutputColumnPair(@"fbs", @"fbs"),
+            new InputOutputColumnPair(@"restecg", @"restecg"),
+            new InputOutputColumnPair(@"thalach", @"thalach"),
+            new InputOutputColumnPair(@"exang", @"exang"),
+            new InputOutputColumnPair(@"oldpeak", @"oldpeak"),
+            new InputOutputColumnPair(@"slope", @"slope"),
+            new InputOutputColumnPair(@"ca", @"ca"),
+            new InputOutputColumnPair(@"thal", @"thal")
+        });
+        return pipeline;
+    }
+
+    public override IEstimator<ITransformer>? BuildLabelRemappingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        return
+            mlContext.Transforms.Conversion.MapKeyToValue(@"PredictedLabel",
+                @"PredictedLabel");
+    }
 
     public class HeartDiseaseModelInput
     {

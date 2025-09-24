@@ -269,68 +269,6 @@ public class BreastCancerWisconsinDiagnosticDataset : Dataset<
         """;
 
 
-    public override IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
-        ScenarioType scenarioType,
-        IEstimator<ITransformer> estimator, bool custom = false)
-    {
-        var pipeline = mlContext.Transforms.ReplaceMissingValues(new[]
-            {
-                new InputOutputColumnPair(@"radius1", @"radius1"),
-                new InputOutputColumnPair(@"texture1", @"texture1"),
-                new InputOutputColumnPair(@"perimeter1", @"perimeter1"),
-                new InputOutputColumnPair(@"area1", @"area1"),
-                new InputOutputColumnPair(@"smoothness1", @"smoothness1"),
-                new InputOutputColumnPair(@"compactness1", @"compactness1"),
-                new InputOutputColumnPair(@"concavity1", @"concavity1"),
-                new InputOutputColumnPair(@"concave_points1",
-                    @"concave_points1"),
-                new InputOutputColumnPair(@"symmetry1", @"symmetry1"),
-                new InputOutputColumnPair(@"fractal_dimension1",
-                    @"fractal_dimension1"),
-                new InputOutputColumnPair(@"radius2", @"radius2"),
-                new InputOutputColumnPair(@"texture2", @"texture2"),
-                new InputOutputColumnPair(@"perimeter2", @"perimeter2"),
-                new InputOutputColumnPair(@"area2", @"area2"),
-                new InputOutputColumnPair(@"smoothness2", @"smoothness2"),
-                new InputOutputColumnPair(@"compactness2", @"compactness2"),
-                new InputOutputColumnPair(@"concavity2", @"concavity2"),
-                new InputOutputColumnPair(@"concave_points2",
-                    @"concave_points2"),
-                new InputOutputColumnPair(@"symmetry2", @"symmetry2"),
-                new InputOutputColumnPair(@"fractal_dimension2",
-                    @"fractal_dimension2"),
-                new InputOutputColumnPair(@"radius3", @"radius3"),
-                new InputOutputColumnPair(@"texture3", @"texture3"),
-                new InputOutputColumnPair(@"perimeter3", @"perimeter3"),
-                new InputOutputColumnPair(@"area3", @"area3"),
-                new InputOutputColumnPair(@"smoothness3", @"smoothness3"),
-                new InputOutputColumnPair(@"compactness3", @"compactness3"),
-                new InputOutputColumnPair(@"concavity3", @"concavity3"),
-                new InputOutputColumnPair(@"concave_points3",
-                    @"concave_points3"),
-                new InputOutputColumnPair(@"symmetry3", @"symmetry3"),
-                new InputOutputColumnPair(@"fractal_dimension3",
-                    @"fractal_dimension3")
-            })
-            .Append(mlContext.Transforms.Concatenate(@"Features", @"radius1",
-                @"texture1", @"perimeter1", @"area1", @"smoothness1",
-                @"compactness1", @"concavity1", @"concave_points1",
-                @"symmetry1", @"fractal_dimension1", @"radius2", @"texture2",
-                @"perimeter2", @"area2", @"smoothness2", @"compactness2",
-                @"concavity2", @"concave_points2", @"symmetry2",
-                @"fractal_dimension2", @"radius3", @"texture3", @"perimeter3",
-                @"area3", @"smoothness3", @"compactness3", @"concavity3",
-                @"concave_points3", @"symmetry3", @"fractal_dimension3"))
-            .Append(mlContext.Transforms.Conversion.MapValueToKey(@"Diagnosis",
-                @"Diagnosis", addKeyValueAnnotationsAsText: false))
-            .Append(estimator)
-            .Append(
-                mlContext.Transforms.Conversion.MapKeyToValue(@"PredictedLabel",
-                    @"PredictedLabel"));
-
-        return pipeline;
-    }
-
     public override IDataView LoadFromTextFile(string path,
         char separatorChar = IDataset.TextLoaderDefaults.Separator,
         bool hasHeader = IDataset.TextLoaderDefaults.HasHeader,
@@ -342,6 +280,89 @@ public class BreastCancerWisconsinDiagnosticDataset : Dataset<
             separatorChar,
             hasHeader,
             allowQuoting, trimWhitespace, allowSparse);
+    }
+
+    public override IEstimator<ITransformer>? BuildFeaturizationPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        return mlContext.Transforms.Concatenate(@"Features", @"radius1",
+            @"texture1", @"perimeter1", @"area1", @"smoothness1",
+            @"compactness1", @"concavity1", @"concave_points1",
+            @"symmetry1", @"fractal_dimension1", @"radius2", @"texture2",
+            @"perimeter2", @"area2", @"smoothness2", @"compactness2",
+            @"concavity2", @"concave_points2", @"symmetry2",
+            @"fractal_dimension2", @"radius3", @"texture3", @"perimeter3",
+            @"area3", @"smoothness3", @"compactness3", @"concavity3",
+            @"concave_points3", @"symmetry3", @"fractal_dimension3");
+    }
+
+    public override IEstimator<ITransformer>? BuildLabelMappingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        return mlContext.Transforms.Conversion.MapValueToKey(@"Diagnosis",
+                @"Diagnosis", addKeyValueAnnotationsAsText: false)
+            .Append(mlContext.Transforms.CopyColumns("Label", "Diagnosis"));
+    }
+
+    public override IEstimator<ITransformer> BuildPreprocessingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        var pipeline = mlContext.Transforms.ReplaceMissingValues(new[]
+        {
+            new InputOutputColumnPair(@"radius1", @"radius1"),
+            new InputOutputColumnPair(@"texture1", @"texture1"),
+            new InputOutputColumnPair(@"perimeter1", @"perimeter1"),
+            new InputOutputColumnPair(@"area1", @"area1"),
+            new InputOutputColumnPair(@"smoothness1", @"smoothness1"),
+            new InputOutputColumnPair(@"compactness1", @"compactness1"),
+            new InputOutputColumnPair(@"concavity1", @"concavity1"),
+            new InputOutputColumnPair(@"concave_points1",
+                @"concave_points1"),
+            new InputOutputColumnPair(@"symmetry1", @"symmetry1"),
+            new InputOutputColumnPair(@"fractal_dimension1",
+                @"fractal_dimension1"),
+            new InputOutputColumnPair(@"radius2", @"radius2"),
+            new InputOutputColumnPair(@"texture2", @"texture2"),
+            new InputOutputColumnPair(@"perimeter2", @"perimeter2"),
+            new InputOutputColumnPair(@"area2", @"area2"),
+            new InputOutputColumnPair(@"smoothness2", @"smoothness2"),
+            new InputOutputColumnPair(@"compactness2", @"compactness2"),
+            new InputOutputColumnPair(@"concavity2", @"concavity2"),
+            new InputOutputColumnPair(@"concave_points2",
+                @"concave_points2"),
+            new InputOutputColumnPair(@"symmetry2", @"symmetry2"),
+            new InputOutputColumnPair(@"fractal_dimension2",
+                @"fractal_dimension2"),
+            new InputOutputColumnPair(@"radius3", @"radius3"),
+            new InputOutputColumnPair(@"texture3", @"texture3"),
+            new InputOutputColumnPair(@"perimeter3", @"perimeter3"),
+            new InputOutputColumnPair(@"area3", @"area3"),
+            new InputOutputColumnPair(@"smoothness3", @"smoothness3"),
+            new InputOutputColumnPair(@"compactness3", @"compactness3"),
+            new InputOutputColumnPair(@"concavity3", @"concavity3"),
+            new InputOutputColumnPair(@"concave_points3",
+                @"concave_points3"),
+            new InputOutputColumnPair(@"symmetry3", @"symmetry3"),
+            new InputOutputColumnPair(@"fractal_dimension3",
+                @"fractal_dimension3")
+        });
+        return pipeline;
+    }
+
+    public override IEstimator<ITransformer>? BuildLabelRemappingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        return
+            mlContext.Transforms.Conversion.MapKeyToValue(@"PredictedLabel",
+                @"PredictedLabel");
     }
 
     public class BreastCancerWisconsinDiagnosticModelInput

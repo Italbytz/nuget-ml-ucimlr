@@ -139,26 +139,41 @@ public class AdultIncomeDataset : Dataset<AdultIncomeDataset.AdultModelInput>
 
         """;
 
-    public override IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
-        ScenarioType scenarioType,
-        IEstimator<ITransformer> estimator, bool custom = false)
+    public override IDataView LoadFromTextFile(string path,
+        char separatorChar = IDataset.TextLoaderDefaults.Separator,
+        bool hasHeader = IDataset.TextLoaderDefaults.HasHeader,
+        bool allowQuoting = IDataset.TextLoaderDefaults.AllowQuoting,
+        bool trimWhitespace = IDataset.TextLoaderDefaults.TrimWhitespace,
+        bool allowSparse = IDataset.TextLoaderDefaults.AllowSparse)
     {
-        var pipeline = mlContext.Transforms.Categorical.OneHotEncoding(
+        return LoadFromTextFile<AdultModelInput>(path,
+            separatorChar,
+            hasHeader,
+            allowQuoting, trimWhitespace, allowSparse);
+    }
+
+    public override IEstimator<ITransformer>? BuildLabelMappingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        return mlContext.Transforms.Conversion.MapValueToKey(@"income",
+                @"income", addKeyValueAnnotationsAsText: false)
+            .Append(mlContext.Transforms.CopyColumns("Label", "income"));
+    }
+
+    public override IEstimator<ITransformer>? BuildFeaturizationPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        return mlContext.Transforms.Categorical.OneHotEncoding(
                 new[]
                 {
                     new InputOutputColumnPair(@"relationship", @"relationship"),
                     new InputOutputColumnPair(@"race", @"race"),
                     new InputOutputColumnPair(@"sex", @"sex")
                 })
-            .Append(mlContext.Transforms.ReplaceMissingValues(new[]
-            {
-                new InputOutputColumnPair(@"age", @"age"),
-                new InputOutputColumnPair(@"fnlwgt", @"fnlwgt"),
-                new InputOutputColumnPair(@"education-num", @"education-num"),
-                new InputOutputColumnPair(@"capital-gain", @"capital-gain"),
-                new InputOutputColumnPair(@"capital-loss", @"capital-loss"),
-                new InputOutputColumnPair(@"hours-per-week", @"hours-per-week")
-            }))
             .Append(mlContext.Transforms.Text.FeaturizeText(
                 inputColumnName: @"workclass", outputColumnName: @"workclass"))
             .Append(mlContext.Transforms.Text.FeaturizeText(
@@ -176,28 +191,33 @@ public class AdultIncomeDataset : Dataset<AdultIncomeDataset.AdultModelInput>
                 @"relationship", @"race", @"sex", @"age", @"fnlwgt",
                 @"education-num", @"capital-gain", @"capital-loss",
                 @"hours-per-week", @"workclass", @"education",
-                @"marital-status", @"occupation", @"native-country"))
-            .Append(mlContext.Transforms.Conversion.MapValueToKey(@"income",
-                @"income", addKeyValueAnnotationsAsText: false))
-            .Append(estimator)
-            .Append(
-                mlContext.Transforms.Conversion.MapKeyToValue(@"PredictedLabel",
-                    @"PredictedLabel"));
-
-        return pipeline;
+                @"marital-status", @"occupation", @"native-country"));
     }
 
-    public override IDataView LoadFromTextFile(string path,
-        char separatorChar = IDataset.TextLoaderDefaults.Separator,
-        bool hasHeader = IDataset.TextLoaderDefaults.HasHeader,
-        bool allowQuoting = IDataset.TextLoaderDefaults.AllowQuoting,
-        bool trimWhitespace = IDataset.TextLoaderDefaults.TrimWhitespace,
-        bool allowSparse = IDataset.TextLoaderDefaults.AllowSparse)
+    public override IEstimator<ITransformer> BuildPreprocessingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
     {
-        return LoadFromTextFile<AdultModelInput>(path,
-            separatorChar,
-            hasHeader,
-            allowQuoting, trimWhitespace, allowSparse);
+        return
+            mlContext.Transforms.ReplaceMissingValues(new[]
+            {
+                new InputOutputColumnPair(@"age", @"age"),
+                new InputOutputColumnPair(@"fnlwgt", @"fnlwgt"),
+                new InputOutputColumnPair(@"education-num", @"education-num"),
+                new InputOutputColumnPair(@"capital-gain", @"capital-gain"),
+                new InputOutputColumnPair(@"capital-loss", @"capital-loss"),
+                new InputOutputColumnPair(@"hours-per-week", @"hours-per-week")
+            });
+    }
+
+    public override IEstimator<ITransformer>? BuildLabelRemappingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        return mlContext.Transforms.Conversion.MapKeyToValue(@"PredictedLabel",
+            @"PredictedLabel");
     }
 
     public class AdultModelInput

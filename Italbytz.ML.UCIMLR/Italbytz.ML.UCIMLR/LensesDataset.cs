@@ -13,13 +13,6 @@ public class LensesDataset : Dataset<LensesDataset.LensesModelInput>
 
     public override string? LabelColumnName { get; } = @"class";
 
-    public override IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
-        ScenarioType scenarioType,
-        IEstimator<ITransformer> estimator, bool custom = false)
-    {
-        throw new NotImplementedException();
-    }
-
     public override IDataView LoadFromTextFile(string path,
         char separatorChar = IDataset.TextLoaderDefaults.Separator,
         bool hasHeader = IDataset.TextLoaderDefaults.HasHeader,
@@ -31,6 +24,14 @@ public class LensesDataset : Dataset<LensesDataset.LensesModelInput>
             separatorChar,
             hasHeader,
             allowQuoting, trimWhitespace, allowSparse);
+    }
+
+    public override IEstimator<ITransformer> BuildPreprocessingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        throw new NotImplementedException();
     }
 
     public class LensesModelInput

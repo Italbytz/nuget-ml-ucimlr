@@ -32,9 +32,6 @@ public abstract class Dataset<TModelInput> : IDataset
             validateFraction, testFraction, seeds);
     }
 
-    public abstract IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
-        ScenarioType scenarioType, IEstimator<ITransformer> estimator,
-        bool custom = false);
 
     public abstract IDataView LoadFromTextFile(string path,
         char separatorChar = IDataset.TextLoaderDefaults.Separator,
@@ -57,6 +54,73 @@ public abstract class Dataset<TModelInput> : IDataset
             path, separatorChar, hasHeader, allowQuoting, trimWhitespace,
             allowSparse);
         return data;
+    }
+
+    public IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
+        IEstimator<ITransformer> estimator,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        var pipeline =
+            BuildPreprocessingPipeline(mlContext, scenarioType, processingType);
+        var featurization =
+            BuildFeaturizationPipeline(mlContext, scenarioType, processingType);
+        if (featurization != null)
+            pipeline = pipeline.Append(featurization);
+        var labelMapping =
+            BuildLabelMappingPipeline(mlContext, scenarioType, processingType);
+        if (labelMapping != null)
+            pipeline = pipeline.Append(labelMapping);
+        pipeline = pipeline.Append(estimator);
+        var labelRemapping =
+            BuildLabelRemappingPipeline(mlContext, scenarioType,
+                processingType);
+        if (labelRemapping != null)
+            pipeline = pipeline.Append(labelRemapping);
+        var postProcessing =
+            BuildPostprocessingPipeline(mlContext, scenarioType,
+                processingType);
+        if (postProcessing !=
+            null)
+            pipeline = pipeline.Append(postProcessing);
+        return pipeline;
+    }
+
+    public abstract IEstimator<ITransformer> BuildPreprocessingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard);
+
+    public virtual IEstimator<ITransformer>? BuildPostprocessingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        return null;
+    }
+
+    public virtual IEstimator<ITransformer>? BuildFeaturizationPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        return null;
+    }
+
+    public virtual IEstimator<ITransformer>? BuildLabelMappingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        return null;
+    }
+
+    public virtual IEstimator<ITransformer>? BuildLabelRemappingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        return null;
     }
 
     private IDataView? LoadDataView()
@@ -93,4 +157,10 @@ public abstract class Dataset<TModelInput> : IDataset
             JsonSerializer.Deserialize<ColumnPropertiesV5[]>(
                 ColumnPropertiesString, options);
     }
+}
+
+public enum ProcessingType
+{
+    Standard,
+    FeatureBinningAndCustomLabelMapping
 }

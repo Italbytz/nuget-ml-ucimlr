@@ -267,11 +267,35 @@ public class StudentPerformanceDataset : Dataset<
         ]
         """;
 
-    public override IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
-        ScenarioType scenarioType,
-        IEstimator<ITransformer> estimator, bool custom = false)
+    public override IEstimator<ITransformer> BuildPreprocessingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
     {
-        var pipeline = mlContext.Transforms.Categorical.OneHotEncoding(
+        return mlContext.Transforms.ReplaceMissingValues(new[]
+        {
+            new InputOutputColumnPair(@"age", @"age"),
+            new InputOutputColumnPair(@"Medu", @"Medu"),
+            new InputOutputColumnPair(@"Fedu", @"Fedu"),
+            new InputOutputColumnPair(@"traveltime", @"traveltime"),
+            new InputOutputColumnPair(@"studytime", @"studytime"),
+            new InputOutputColumnPair(@"failures", @"failures"),
+            new InputOutputColumnPair(@"famrel", @"famrel"),
+            new InputOutputColumnPair(@"freetime", @"freetime"),
+            new InputOutputColumnPair(@"goout", @"goout"),
+            new InputOutputColumnPair(@"Dalc", @"Dalc"),
+            new InputOutputColumnPair(@"Walc", @"Walc"),
+            new InputOutputColumnPair(@"health", @"health"),
+            new InputOutputColumnPair(@"absences", @"absences")
+        });
+    }
+
+    public override IEstimator<ITransformer>? BuildFeaturizationPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        return mlContext.Transforms.Categorical.OneHotEncoding(
                 new[]
                 {
                     new InputOutputColumnPair(@"school", @"school"),
@@ -292,32 +316,13 @@ public class StudentPerformanceDataset : Dataset<
                     new InputOutputColumnPair(@"internet", @"internet"),
                     new InputOutputColumnPair(@"romantic", @"romantic")
                 })
-            .Append(mlContext.Transforms.ReplaceMissingValues(new[]
-            {
-                new InputOutputColumnPair(@"age", @"age"),
-                new InputOutputColumnPair(@"Medu", @"Medu"),
-                new InputOutputColumnPair(@"Fedu", @"Fedu"),
-                new InputOutputColumnPair(@"traveltime", @"traveltime"),
-                new InputOutputColumnPair(@"studytime", @"studytime"),
-                new InputOutputColumnPair(@"failures", @"failures"),
-                new InputOutputColumnPair(@"famrel", @"famrel"),
-                new InputOutputColumnPair(@"freetime", @"freetime"),
-                new InputOutputColumnPair(@"goout", @"goout"),
-                new InputOutputColumnPair(@"Dalc", @"Dalc"),
-                new InputOutputColumnPair(@"Walc", @"Walc"),
-                new InputOutputColumnPair(@"health", @"health"),
-                new InputOutputColumnPair(@"absences", @"absences")
-            }))
             .Append(mlContext.Transforms.Concatenate(@"Features", @"school",
                 @"sex", @"address", @"famsize", @"Pstatus", @"Mjob", @"Fjob",
                 @"reason", @"guardian", @"schoolsup", @"famsup", @"paid",
                 @"activities", @"nursery", @"higher", @"internet", @"romantic",
                 @"age", @"Medu", @"Fedu", @"traveltime", @"studytime",
                 @"failures", @"famrel", @"freetime", @"goout", @"Dalc", @"Walc",
-                @"health", @"absences"))
-            .Append(estimator);
-
-        return pipeline;
+                @"health", @"absences"));
     }
 
     public override IDataView LoadFromTextFile(string path,

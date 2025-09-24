@@ -21,8 +21,34 @@ public interface IDataset
     );
 
     public IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
-        ScenarioType scenarioType, IEstimator<ITransformer> estimator,
-        bool custom = false);
+        IEstimator<ITransformer> estimator,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard);
+
+    public IEstimator<ITransformer> BuildPreprocessingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard);
+
+    public IEstimator<ITransformer>? BuildPostprocessingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard);
+
+    public IEstimator<ITransformer>? BuildFeaturizationPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard);
+
+    public IEstimator<ITransformer>? BuildLabelMappingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard);
+
+    public IEstimator<ITransformer>? BuildLabelRemappingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard);
 
     protected IDataView LoadFromTextFile<TModelInput>(
         string path,

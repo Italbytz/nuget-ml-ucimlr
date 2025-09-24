@@ -14,9 +14,10 @@ public class SolarFlareDataset : Dataset<SolarFlareDataset.SolarflareModelInput>
     public override string? LabelColumnName { get; } =
         @"flares";
 
-    public override IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
-        ScenarioType scenarioType,
-        IEstimator<ITransformer> estimator, bool custom = false)
+    public override IEstimator<ITransformer> BuildPreprocessingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
     {
         throw new NotImplementedException();
     }

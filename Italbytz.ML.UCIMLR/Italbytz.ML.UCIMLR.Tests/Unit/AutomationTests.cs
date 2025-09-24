@@ -49,6 +49,22 @@ public class AutomationTests
     private StreamWriter SeedWriter { get; set; }
 
     [TestMethod]
+    public void SimulateNPHAClassification()
+    {
+        var data = Data.NPHA;
+        var metrics = Simulate(data, ScenarioType.Classification,
+            ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
+            _seeds, 60, 0.2f);
+        var accuracies = metrics.Select(m =>
+            m.F1Score.ToString(CultureInfo.InvariantCulture));
+        File.WriteAllLines(
+            "/Users/nunkesser/repos/work/articles/logicgpbio/data/ucimlrepo/NPHA/AutoML.csv",
+            accuracies);
+        Console.WriteLine(
+            string.Join(',', accuracies));
+    }
+
+    [TestMethod]
     public void SimulateIrisClassification()
     {
         var data = Data.Iris;

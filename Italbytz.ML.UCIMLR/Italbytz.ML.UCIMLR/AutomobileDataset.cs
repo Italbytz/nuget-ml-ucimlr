@@ -226,59 +226,6 @@ public class AutomobileDataset : Dataset<AutomobileDataset.AutomobileModelInput>
         ]
         """;
 
-    public override IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
-        ScenarioType scenarioType,
-        IEstimator<ITransformer> estimator, bool custom = false)
-    {
-        var pipeline = mlContext.Transforms.Categorical.OneHotEncoding(
-                new[]
-                {
-                    new InputOutputColumnPair(@"fuel-system", @"fuel-system"),
-                    new InputOutputColumnPair(@"engine-type", @"engine-type"),
-                    new InputOutputColumnPair(@"engine-location",
-                        @"engine-location"),
-                    new InputOutputColumnPair(@"drive-wheels", @"drive-wheels"),
-                    new InputOutputColumnPair(@"body-style", @"body-style"),
-                    new InputOutputColumnPair(@"aspiration", @"aspiration"),
-                    new InputOutputColumnPair(@"fuel-type", @"fuel-type")
-                })
-            .Append(mlContext.Transforms.ReplaceMissingValues(new[]
-            {
-                new InputOutputColumnPair(@"price", @"price"),
-                new InputOutputColumnPair(@"highway-mpg", @"highway-mpg"),
-                new InputOutputColumnPair(@"city-mpg", @"city-mpg"),
-                new InputOutputColumnPair(@"peak-rpm", @"peak-rpm"),
-                new InputOutputColumnPair(@"horsepower", @"horsepower"),
-                new InputOutputColumnPair(@"compression-ratio",
-                    @"compression-ratio"),
-                new InputOutputColumnPair(@"stroke", @"stroke"),
-                new InputOutputColumnPair(@"bore", @"bore"),
-                new InputOutputColumnPair(@"engine-size", @"engine-size"),
-                new InputOutputColumnPair(@"num-of-cylinders",
-                    @"num-of-cylinders"),
-                new InputOutputColumnPair(@"curb-weight", @"curb-weight"),
-                new InputOutputColumnPair(@"height", @"height"),
-                new InputOutputColumnPair(@"width", @"width"),
-                new InputOutputColumnPair(@"length", @"length"),
-                new InputOutputColumnPair(@"wheel-base", @"wheel-base"),
-                new InputOutputColumnPair(@"num-of-doors", @"num-of-doors"),
-                new InputOutputColumnPair(@"normalized-losses",
-                    @"normalized-losses")
-            }))
-            .Append(mlContext.Transforms.Text.FeaturizeText(
-                inputColumnName: @"make", outputColumnName: @"make"))
-            .Append(mlContext.Transforms.Concatenate(@"Features",
-                @"fuel-system", @"engine-type", @"engine-location",
-                @"drive-wheels", @"body-style", @"aspiration", @"fuel-type",
-                @"price", @"highway-mpg", @"city-mpg", @"peak-rpm",
-                @"horsepower", @"compression-ratio", @"stroke", @"bore",
-                @"engine-size", @"num-of-cylinders", @"curb-weight", @"height",
-                @"width", @"length", @"wheel-base", @"num-of-doors",
-                @"normalized-losses", @"make"))
-            .Append(estimator);
-
-        return pipeline;
-    }
 
     public override IDataView LoadFromTextFile(string path,
         char separatorChar = IDataset.TextLoaderDefaults.Separator,
@@ -291,6 +238,68 @@ public class AutomobileDataset : Dataset<AutomobileDataset.AutomobileModelInput>
             separatorChar,
             hasHeader,
             allowQuoting, trimWhitespace, allowSparse);
+    }
+
+    public override IEstimator<ITransformer>? BuildFeaturizationPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        return mlContext.Transforms.Categorical.OneHotEncoding(
+                new[]
+                {
+                    new InputOutputColumnPair(@"fuel-system", @"fuel-system"),
+                    new InputOutputColumnPair(@"engine-type", @"engine-type"),
+                    new InputOutputColumnPair(@"engine-location",
+                        @"engine-location"),
+                    new InputOutputColumnPair(@"drive-wheels", @"drive-wheels"),
+                    new InputOutputColumnPair(@"body-style", @"body-style"),
+                    new InputOutputColumnPair(@"aspiration", @"aspiration"),
+                    new InputOutputColumnPair(@"fuel-type", @"fuel-type")
+                }).Append(mlContext.Transforms.Text.FeaturizeText(
+                inputColumnName: @"make", outputColumnName: @"make"))
+            .Append(mlContext.Transforms.Concatenate(@"Features",
+                @"fuel-system", @"engine-type", @"engine-location",
+                @"drive-wheels", @"body-style", @"aspiration", @"fuel-type",
+                @"price", @"highway-mpg", @"city-mpg", @"peak-rpm",
+                @"horsepower", @"compression-ratio", @"stroke", @"bore",
+                @"engine-size", @"num-of-cylinders", @"curb-weight", @"height",
+                @"width", @"length", @"wheel-base", @"num-of-doors",
+                @"normalized-losses", @"make"));
+    }
+
+    public override IEstimator<ITransformer> BuildPreprocessingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        var pipeline =
+                mlContext.Transforms.ReplaceMissingValues(new[]
+                {
+                    new InputOutputColumnPair(@"price", @"price"),
+                    new InputOutputColumnPair(@"highway-mpg", @"highway-mpg"),
+                    new InputOutputColumnPair(@"city-mpg", @"city-mpg"),
+                    new InputOutputColumnPair(@"peak-rpm", @"peak-rpm"),
+                    new InputOutputColumnPair(@"horsepower", @"horsepower"),
+                    new InputOutputColumnPair(@"compression-ratio",
+                        @"compression-ratio"),
+                    new InputOutputColumnPair(@"stroke", @"stroke"),
+                    new InputOutputColumnPair(@"bore", @"bore"),
+                    new InputOutputColumnPair(@"engine-size", @"engine-size"),
+                    new InputOutputColumnPair(@"num-of-cylinders",
+                        @"num-of-cylinders"),
+                    new InputOutputColumnPair(@"curb-weight", @"curb-weight"),
+                    new InputOutputColumnPair(@"height", @"height"),
+                    new InputOutputColumnPair(@"width", @"width"),
+                    new InputOutputColumnPair(@"length", @"length"),
+                    new InputOutputColumnPair(@"wheel-base", @"wheel-base"),
+                    new InputOutputColumnPair(@"num-of-doors", @"num-of-doors"),
+                    new InputOutputColumnPair(@"normalized-losses",
+                        @"normalized-losses")
+                })
+            ;
+
+        return pipeline;
     }
 
     public class AutomobileModelInput

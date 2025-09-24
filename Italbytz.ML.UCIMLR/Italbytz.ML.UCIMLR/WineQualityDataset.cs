@@ -115,40 +115,60 @@ public class
         ]
         """;
 
-    public override IEstimator<ITransformer> BuildPipeline(MLContext mlContext,
-        ScenarioType scenarioType,
-        IEstimator<ITransformer> estimator, bool custom = false)
+    public override IEstimator<ITransformer> BuildPreprocessingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
     {
-        var pipeline = mlContext.Transforms.ReplaceMissingValues(new[]
-            {
-                new InputOutputColumnPair(@"fixed_acidity", @"fixed_acidity"),
-                new InputOutputColumnPair(@"volatile_acidity",
-                    @"volatile_acidity"),
-                new InputOutputColumnPair(@"citric_acid", @"citric_acid"),
-                new InputOutputColumnPair(@"residual_sugar", @"residual_sugar"),
-                new InputOutputColumnPair(@"chlorides", @"chlorides"),
-                new InputOutputColumnPair(@"free_sulfur_dioxide",
-                    @"free_sulfur_dioxide"),
-                new InputOutputColumnPair(@"total_sulfur_dioxide",
-                    @"total_sulfur_dioxide"),
-                new InputOutputColumnPair(@"density", @"density"),
-                new InputOutputColumnPair(@"pH", @"pH"),
-                new InputOutputColumnPair(@"sulphates", @"sulphates"),
-                new InputOutputColumnPair(@"alcohol", @"alcohol")
-            })
-            .Append(mlContext.Transforms.Concatenate(@"Features",
-                @"fixed_acidity", @"volatile_acidity", @"citric_acid",
-                @"residual_sugar", @"chlorides", @"free_sulfur_dioxide",
-                @"total_sulfur_dioxide", @"density", @"pH", @"sulphates",
-                @"alcohol"))
-            .Append(mlContext.Transforms.Conversion.MapValueToKey(@"quality",
-                @"quality", addKeyValueAnnotationsAsText: false))
-            .Append(estimator)
-            .Append(
-                mlContext.Transforms.Conversion.MapKeyToValue(@"PredictedLabel",
-                    @"PredictedLabel"));
+        return mlContext.Transforms.ReplaceMissingValues(new[]
+        {
+            new InputOutputColumnPair(@"fixed_acidity", @"fixed_acidity"),
+            new InputOutputColumnPair(@"volatile_acidity",
+                @"volatile_acidity"),
+            new InputOutputColumnPair(@"citric_acid", @"citric_acid"),
+            new InputOutputColumnPair(@"residual_sugar", @"residual_sugar"),
+            new InputOutputColumnPair(@"chlorides", @"chlorides"),
+            new InputOutputColumnPair(@"free_sulfur_dioxide",
+                @"free_sulfur_dioxide"),
+            new InputOutputColumnPair(@"total_sulfur_dioxide",
+                @"total_sulfur_dioxide"),
+            new InputOutputColumnPair(@"density", @"density"),
+            new InputOutputColumnPair(@"pH", @"pH"),
+            new InputOutputColumnPair(@"sulphates", @"sulphates"),
+            new InputOutputColumnPair(@"alcohol", @"alcohol")
+        });
+    }
 
-        return pipeline;
+    public override IEstimator<ITransformer>? BuildFeaturizationPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        return mlContext.Transforms.Concatenate(@"Features",
+            @"fixed_acidity", @"volatile_acidity", @"citric_acid",
+            @"residual_sugar", @"chlorides", @"free_sulfur_dioxide",
+            @"total_sulfur_dioxide", @"density", @"pH", @"sulphates",
+            @"alcohol");
+    }
+
+    public override IEstimator<ITransformer>? BuildLabelMappingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        return mlContext.Transforms.Conversion.MapValueToKey(@"quality",
+                @"quality", addKeyValueAnnotationsAsText: false)
+            .Append(mlContext.Transforms.CopyColumns("Label",
+                "quality"));
+    }
+
+    public override IEstimator<ITransformer>? BuildLabelRemappingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        return mlContext.Transforms.Conversion.MapKeyToValue(@"PredictedLabel",
+            @"PredictedLabel");
     }
 
     public override IDataView LoadFromTextFile(string path,
