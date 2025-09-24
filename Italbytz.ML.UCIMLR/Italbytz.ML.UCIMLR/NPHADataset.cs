@@ -160,7 +160,7 @@ public class NPHADataset : Dataset<NPHADataset.NationalPollModelInput>
             allowQuoting, trimWhitespace, allowSparse);
     }
 
-    public override IEstimator<ITransformer>? BuildFeaturizationPipeline(
+    protected override IEstimator<ITransformer>? BuildFeaturizationPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
@@ -177,7 +177,7 @@ public class NPHADataset : Dataset<NPHADataset.NationalPollModelInput>
         throw new NotImplementedException();
     }
 
-    public override IEstimator<ITransformer>? BuildLabelMappingPipeline(
+    protected override IEstimator<ITransformer>? BuildLabelMappingPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
@@ -187,22 +187,23 @@ public class NPHADataset : Dataset<NPHADataset.NationalPollModelInput>
             if (processingType ==
                 ProcessingType.FeatureBinningAndCustomLabelMapping)
                 return mlContext.Transforms.Conversion.MapValueToKey(
-                        @"Label", @"Number_of_Doctors_Visited",
-                        keyData: mlContext.Data.LoadFromEnumerable(_lookupData))
-                    .Append(mlContext.Transforms.CopyColumns("Label",
-                        "Number_of_Doctors_Visited"));
+                    @"Label", @"Number_of_Doctors_Visited",
+                    keyData: mlContext.Data.LoadFromEnumerable(_lookupData));
+
 
             if (processingType == ProcessingType.Standard)
                 return mlContext.Transforms.Conversion.MapValueToKey(
                     @"Number_of_Doctors_Visited",
                     @"Number_of_Doctors_Visited",
-                    addKeyValueAnnotationsAsText: false);
+                    addKeyValueAnnotationsAsText: false).Append(
+                    mlContext.Transforms.CopyColumns("Label",
+                        "Number_of_Doctors_Visited"));
         }
 
         throw new NotImplementedException();
     }
 
-    public override IEstimator<ITransformer> BuildPreprocessingPipeline(
+    protected override IEstimator<ITransformer> AdditionalPreprocessingPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
@@ -244,7 +245,7 @@ public class NPHADataset : Dataset<NPHADataset.NationalPollModelInput>
         throw new NotImplementedException();
     }
 
-    public override IEstimator<ITransformer>? BuildLabelRemappingPipeline(
+    protected override IEstimator<ITransformer>? BuildLabelRemappingPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)

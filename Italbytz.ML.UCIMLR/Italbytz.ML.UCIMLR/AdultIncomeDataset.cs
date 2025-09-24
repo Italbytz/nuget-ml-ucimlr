@@ -152,7 +152,7 @@ public class AdultIncomeDataset : Dataset<AdultIncomeDataset.AdultModelInput>
             allowQuoting, trimWhitespace, allowSparse);
     }
 
-    public override IEstimator<ITransformer>? BuildLabelMappingPipeline(
+    protected override IEstimator<ITransformer>? BuildLabelMappingPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
@@ -162,7 +162,7 @@ public class AdultIncomeDataset : Dataset<AdultIncomeDataset.AdultModelInput>
             .Append(mlContext.Transforms.CopyColumns("Label", "income"));
     }
 
-    public override IEstimator<ITransformer>? BuildFeaturizationPipeline(
+    protected override IEstimator<ITransformer>? BuildFeaturizationPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
@@ -194,7 +194,7 @@ public class AdultIncomeDataset : Dataset<AdultIncomeDataset.AdultModelInput>
                 @"marital-status", @"occupation", @"native-country"));
     }
 
-    public override IEstimator<ITransformer> BuildPreprocessingPipeline(
+    protected override IEstimator<ITransformer> AdditionalPreprocessingPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
@@ -211,7 +211,7 @@ public class AdultIncomeDataset : Dataset<AdultIncomeDataset.AdultModelInput>
             });
     }
 
-    public override IEstimator<ITransformer>? BuildLabelRemappingPipeline(
+    protected override IEstimator<ITransformer>? BuildLabelRemappingPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)

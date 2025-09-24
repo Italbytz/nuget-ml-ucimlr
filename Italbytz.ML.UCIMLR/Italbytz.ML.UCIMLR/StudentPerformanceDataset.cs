@@ -267,7 +267,7 @@ public class StudentPerformanceDataset : Dataset<
         ]
         """;
 
-    public override IEstimator<ITransformer> BuildPreprocessingPipeline(
+    protected override IEstimator<ITransformer> AdditionalPreprocessingPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
@@ -290,7 +290,7 @@ public class StudentPerformanceDataset : Dataset<
         });
     }
 
-    public override IEstimator<ITransformer>? BuildFeaturizationPipeline(
+    protected override IEstimator<ITransformer>? BuildFeaturizationPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)

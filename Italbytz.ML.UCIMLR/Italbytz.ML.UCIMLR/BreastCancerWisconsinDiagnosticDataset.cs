@@ -282,7 +282,7 @@ public class BreastCancerWisconsinDiagnosticDataset : Dataset<
             allowQuoting, trimWhitespace, allowSparse);
     }
 
-    public override IEstimator<ITransformer>? BuildFeaturizationPipeline(
+    protected override IEstimator<ITransformer>? BuildFeaturizationPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
@@ -298,7 +298,7 @@ public class BreastCancerWisconsinDiagnosticDataset : Dataset<
             @"concave_points3", @"symmetry3", @"fractal_dimension3");
     }
 
-    public override IEstimator<ITransformer>? BuildLabelMappingPipeline(
+    protected override IEstimator<ITransformer>? BuildLabelMappingPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
@@ -308,7 +308,7 @@ public class BreastCancerWisconsinDiagnosticDataset : Dataset<
             .Append(mlContext.Transforms.CopyColumns("Label", "Diagnosis"));
     }
 
-    public override IEstimator<ITransformer> BuildPreprocessingPipeline(
+    protected override IEstimator<ITransformer> AdditionalPreprocessingPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
@@ -355,7 +355,7 @@ public class BreastCancerWisconsinDiagnosticDataset : Dataset<
         return pipeline;
     }
 
-    public override IEstimator<ITransformer>? BuildLabelRemappingPipeline(
+    protected override IEstimator<ITransformer>? BuildLabelRemappingPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)

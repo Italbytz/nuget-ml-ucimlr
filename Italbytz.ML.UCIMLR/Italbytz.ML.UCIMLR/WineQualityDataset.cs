@@ -115,7 +115,7 @@ public class
         ]
         """;
 
-    public override IEstimator<ITransformer> BuildPreprocessingPipeline(
+    protected override IEstimator<ITransformer> AdditionalPreprocessingPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
@@ -139,7 +139,7 @@ public class
         });
     }
 
-    public override IEstimator<ITransformer>? BuildFeaturizationPipeline(
+    protected override IEstimator<ITransformer>? BuildFeaturizationPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
@@ -151,7 +151,7 @@ public class
             @"alcohol");
     }
 
-    public override IEstimator<ITransformer>? BuildLabelMappingPipeline(
+    protected override IEstimator<ITransformer>? BuildLabelMappingPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
@@ -162,7 +162,7 @@ public class
                 "quality"));
     }
 
-    public override IEstimator<ITransformer>? BuildLabelRemappingPipeline(
+    protected override IEstimator<ITransformer>? BuildLabelRemappingPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)

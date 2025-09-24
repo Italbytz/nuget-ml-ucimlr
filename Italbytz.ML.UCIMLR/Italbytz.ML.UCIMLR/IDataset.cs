@@ -35,21 +35,6 @@ public interface IDataset
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard);
 
-    public IEstimator<ITransformer>? BuildFeaturizationPipeline(
-        MLContext mlContext,
-        ScenarioType scenarioType = ScenarioType.Classification,
-        ProcessingType processingType = ProcessingType.Standard);
-
-    public IEstimator<ITransformer>? BuildLabelMappingPipeline(
-        MLContext mlContext,
-        ScenarioType scenarioType = ScenarioType.Classification,
-        ProcessingType processingType = ProcessingType.Standard);
-
-    public IEstimator<ITransformer>? BuildLabelRemappingPipeline(
-        MLContext mlContext,
-        ScenarioType scenarioType = ScenarioType.Classification,
-        ProcessingType processingType = ProcessingType.Standard);
-
     protected IDataView LoadFromTextFile<TModelInput>(
         string path,
         char separatorChar = TextLoaderDefaults.Separator,

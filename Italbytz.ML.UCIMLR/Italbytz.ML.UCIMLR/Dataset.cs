@@ -63,20 +63,7 @@ public abstract class Dataset<TModelInput> : IDataset
     {
         var pipeline =
             BuildPreprocessingPipeline(mlContext, scenarioType, processingType);
-        var featurization =
-            BuildFeaturizationPipeline(mlContext, scenarioType, processingType);
-        if (featurization != null)
-            pipeline = pipeline.Append(featurization);
-        var labelMapping =
-            BuildLabelMappingPipeline(mlContext, scenarioType, processingType);
-        if (labelMapping != null)
-            pipeline = pipeline.Append(labelMapping);
         pipeline = pipeline.Append(estimator);
-        var labelRemapping =
-            BuildLabelRemappingPipeline(mlContext, scenarioType,
-                processingType);
-        if (labelRemapping != null)
-            pipeline = pipeline.Append(labelRemapping);
         var postProcessing =
             BuildPostprocessingPipeline(mlContext, scenarioType,
                 processingType);
@@ -86,20 +73,57 @@ public abstract class Dataset<TModelInput> : IDataset
         return pipeline;
     }
 
-    public abstract IEstimator<ITransformer> BuildPreprocessingPipeline(
+    public virtual IEstimator<ITransformer> BuildPreprocessingPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
-        ProcessingType processingType = ProcessingType.Standard);
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        var pipeline =
+            AdditionalPreprocessingPipeline(mlContext, scenarioType,
+                processingType);
+        var featurization =
+            BuildFeaturizationPipeline(mlContext, scenarioType, processingType);
+        if (featurization != null)
+            pipeline = pipeline.Append(featurization);
+        var labelMapping =
+            BuildLabelMappingPipeline(mlContext, scenarioType, processingType);
+        if (labelMapping != null)
+            pipeline = pipeline.Append(labelMapping);
+        return pipeline;
+    }
 
     public virtual IEstimator<ITransformer>? BuildPostprocessingPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
     {
+        var additionalPostprocessing =
+            AdditionalPostprocessingPipeline(mlContext, scenarioType,
+                processingType);
+        var labelRemapping =
+            BuildLabelRemappingPipeline(mlContext, scenarioType,
+                processingType);
+        if (labelRemapping != null && additionalPostprocessing != null)
+            return labelRemapping.Append(additionalPostprocessing);
+        if (labelRemapping != null) return labelRemapping;
+        return additionalPostprocessing ?? null;
+    }
+
+    protected abstract IEstimator<ITransformer> AdditionalPreprocessingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard);
+
+    protected virtual IEstimator<ITransformer>?
+        AdditionalPostprocessingPipeline(
+            MLContext mlContext,
+            ScenarioType scenarioType = ScenarioType.Classification,
+            ProcessingType processingType = ProcessingType.Standard)
+    {
         return null;
     }
 
-    public virtual IEstimator<ITransformer>? BuildFeaturizationPipeline(
+    protected virtual IEstimator<ITransformer>? BuildFeaturizationPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
@@ -107,7 +131,7 @@ public abstract class Dataset<TModelInput> : IDataset
         return null;
     }
 
-    public virtual IEstimator<ITransformer>? BuildLabelMappingPipeline(
+    protected virtual IEstimator<ITransformer>? BuildLabelMappingPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
@@ -115,7 +139,7 @@ public abstract class Dataset<TModelInput> : IDataset
         return null;
     }
 
-    public virtual IEstimator<ITransformer>? BuildLabelRemappingPipeline(
+    protected virtual IEstimator<ITransformer>? BuildLabelRemappingPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)

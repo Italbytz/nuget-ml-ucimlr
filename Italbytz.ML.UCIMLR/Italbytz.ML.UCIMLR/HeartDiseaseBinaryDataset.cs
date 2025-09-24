@@ -145,7 +145,7 @@ public class
             allowQuoting, trimWhitespace, allowSparse);
     }
 
-    public override IEstimator<ITransformer>? BuildFeaturizationPipeline(
+    protected override IEstimator<ITransformer>? BuildFeaturizationPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
@@ -155,7 +155,7 @@ public class
             @"thalach", @"exang", @"oldpeak", @"slope", @"ca", @"thal");
     }
 
-    public override IEstimator<ITransformer>? BuildLabelMappingPipeline(
+    protected override IEstimator<ITransformer>? BuildLabelMappingPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
@@ -165,7 +165,7 @@ public class
             .Append(mlContext.Transforms.CopyColumns("Label", "num"));
     }
 
-    public override IEstimator<ITransformer> BuildPreprocessingPipeline(
+    protected override IEstimator<ITransformer> AdditionalPreprocessingPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
@@ -189,7 +189,7 @@ public class
         return pipeline;
     }
 
-    public override IEstimator<ITransformer>? BuildLabelRemappingPipeline(
+    protected override IEstimator<ITransformer>? BuildLabelRemappingPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
