@@ -37,19 +37,19 @@ public interface IDataset
 
     protected IDataView LoadFromTextFile<TModelInput>(
         string path,
-        char separatorChar = TextLoaderDefaults.Separator,
-        bool hasHeader = TextLoaderDefaults.HasHeader,
-        bool allowQuoting = TextLoaderDefaults.AllowQuoting,
-        bool trimWhitespace = TextLoaderDefaults.TrimWhitespace,
-        bool allowSparse = TextLoaderDefaults.AllowSparse);
+        char? separatorChar = null,
+        bool? hasHeader = null,
+        bool? allowQuoting = null,
+        bool? trimWhitespace = null,
+        bool? allowSparse = null);
 
     public IDataView LoadFromTextFile(
         string path,
-        char separatorChar = TextLoaderDefaults.Separator,
-        bool hasHeader = TextLoaderDefaults.HasHeader,
-        bool allowQuoting = TextLoaderDefaults.AllowQuoting,
-        bool trimWhitespace = TextLoaderDefaults.TrimWhitespace,
-        bool allowSparse = TextLoaderDefaults.AllowSparse);
+        char? separatorChar = null,
+        bool? hasHeader = null,
+        bool? allowQuoting = null,
+        bool? trimWhitespace = null,
+        bool? allowSparse = null);
 
     internal static class TextLoaderDefaults
     {

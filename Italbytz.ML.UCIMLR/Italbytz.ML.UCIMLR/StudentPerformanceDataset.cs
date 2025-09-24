@@ -326,11 +326,9 @@ public class StudentPerformanceDataset : Dataset<
     }
 
     public override IDataView LoadFromTextFile(string path,
-        char separatorChar = IDataset.TextLoaderDefaults.Separator,
-        bool hasHeader = IDataset.TextLoaderDefaults.HasHeader,
-        bool allowQuoting = IDataset.TextLoaderDefaults.AllowQuoting,
-        bool trimWhitespace = IDataset.TextLoaderDefaults.TrimWhitespace,
-        bool allowSparse = IDataset.TextLoaderDefaults.AllowSparse)
+        char? separatorChar = null,
+        bool? hasHeader = null, bool? allowQuoting = null,
+        bool? trimWhitespace = null, bool? allowSparse = null)
     {
         return LoadFromTextFile<StudentPerformanceModelInput>(path,
             separatorChar,

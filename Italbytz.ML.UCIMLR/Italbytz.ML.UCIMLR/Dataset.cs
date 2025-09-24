@@ -14,6 +14,10 @@ public abstract class Dataset<TModelInput> : IDataset
     protected virtual string ColumnPropertiesString { get; }
 
     protected virtual string ResourceName { get; }
+
+    public bool? HasHeader { get; set; } = true;
+
+    public char? SeperatorChar { get; set; } = ',';
     public virtual string FilePrefix { get; }
 
     public IColumnProperties[] ColumnProperties =>
@@ -34,25 +38,27 @@ public abstract class Dataset<TModelInput> : IDataset
 
 
     public abstract IDataView LoadFromTextFile(string path,
-        char separatorChar = IDataset.TextLoaderDefaults.Separator,
-        bool hasHeader = IDataset.TextLoaderDefaults.HasHeader,
-        bool allowQuoting = IDataset.TextLoaderDefaults.AllowQuoting,
-        bool trimWhitespace = IDataset.TextLoaderDefaults.TrimWhitespace,
-        bool allowSparse = IDataset.TextLoaderDefaults.AllowSparse);
+        char? separatorChar = null,
+        bool? hasHeader = null, bool? allowQuoting = null,
+        bool? trimWhitespace = null, bool? allowSparse = null);
 
-
-    public IDataView LoadFromTextFile<TModelInput>(string path,
-        char separatorChar = IDataset.TextLoaderDefaults.Separator,
-        bool hasHeader = IDataset.TextLoaderDefaults.HasHeader,
-        bool allowQuoting = IDataset.TextLoaderDefaults.AllowQuoting,
-        bool trimWhitespace = IDataset.TextLoaderDefaults.TrimWhitespace,
-        bool allowSparse = IDataset.TextLoaderDefaults.AllowSparse)
+    public IDataView LoadFromTextFile<TModelInput1>(string path,
+        char? separatorChar = null, bool? hasHeader = null,
+        bool? allowQuoting = null, bool? trimWhitespace = null,
+        bool? allowSparse = null)
     {
+        separatorChar ??= IDataset.TextLoaderDefaults.Separator;
+        hasHeader ??= IDataset.TextLoaderDefaults.HasHeader;
+        allowQuoting ??= IDataset.TextLoaderDefaults.AllowQuoting;
+        trimWhitespace ??= IDataset.TextLoaderDefaults.TrimWhitespace;
+        allowSparse ??= IDataset.TextLoaderDefaults.AllowSparse;
+
         var mlContext = new MLContext();
         // Load the dataset from the specified path
         var data = mlContext.Data.LoadFromTextFile<TModelInput>(
-            path, separatorChar, hasHeader, allowQuoting, trimWhitespace,
-            allowSparse);
+            path, (char)separatorChar, (bool)hasHeader, (bool)allowQuoting,
+            (bool)trimWhitespace,
+            (bool)allowSparse);
         return data;
     }
 
@@ -109,6 +115,7 @@ public abstract class Dataset<TModelInput> : IDataset
         return additionalPostprocessing ?? null;
     }
 
+
     protected abstract IEstimator<ITransformer> AdditionalPreprocessingPipeline(
         MLContext mlContext,
         ScenarioType scenarioType = ScenarioType.Classification,
@@ -155,7 +162,8 @@ public abstract class Dataset<TModelInput> : IDataset
         stream?.CopyTo(fileStream);
         fileStream.Flush();
         fileStream.Close();
-        var data = LoadFromTextFile<TModelInput>(tempFile, ',', true);
+        var data =
+            LoadFromTextFile<TModelInput>(tempFile, SeperatorChar, HasHeader);
         return data ??
                throw new InvalidOperationException("Failed to load data");
     }
