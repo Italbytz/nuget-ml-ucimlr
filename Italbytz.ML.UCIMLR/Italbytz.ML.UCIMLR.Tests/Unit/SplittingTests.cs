@@ -22,7 +22,7 @@ public class SplittingTests
                 seeds: [42]).ToList();
         var dataView =
             dataset.LoadFromTextFile(Path.Combine(tmpDir,
-                files[0].TrainValidateFileName), ',', true);
+                files[0].TrainValidateFileName));
         //var dataView = dataset.DataView;
         var pipeline = dataset.BuildPreprocessingPipeline(mlContext);
         var model = pipeline.Fit(dataView);
