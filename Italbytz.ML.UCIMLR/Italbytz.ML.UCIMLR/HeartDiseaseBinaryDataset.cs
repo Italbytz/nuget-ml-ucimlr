@@ -158,9 +158,30 @@ public class
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
     {
-        return mlContext.Transforms.Concatenate(@"Features", @"age",
-            @"sex", @"cp", @"trestbps", @"chol", @"fbs", @"restecg",
-            @"thalach", @"exang", @"oldpeak", @"slope", @"ca", @"thal");
+        if (processingType ==
+            ProcessingType.FeatureBinningAndCustomLabelMapping)
+            return mlContext.Transforms.NormalizeBinning(new[]
+            {
+                new InputOutputColumnPair(@"age",
+                    @"age"),
+                new InputOutputColumnPair("trestbps",
+                    "trestbps"),
+                new InputOutputColumnPair(@"chol",
+                    @"chol"),
+                new InputOutputColumnPair(@"thalach",
+                    @"thalach"),
+                new InputOutputColumnPair(@"oldpeak",
+                    @"oldpeak"),
+                new InputOutputColumnPair(@"ca", @"ca")
+            }, maximumBinCount: 4).Append(mlContext.Transforms.Concatenate(
+                @"Features", @"age",
+                @"sex", @"cp", @"trestbps", @"chol", @"fbs", @"restecg",
+                @"thalach", @"exang", @"oldpeak", @"slope", @"ca", @"thal"));
+        if (processingType == ProcessingType.Standard)
+            return mlContext.Transforms.Concatenate(@"Features", @"age",
+                @"sex", @"cp", @"trestbps", @"chol", @"fbs", @"restecg",
+                @"thalach", @"exang", @"oldpeak", @"slope", @"ca", @"thal");
+        throw new NotImplementedException();
     }
 
     protected override IEstimator<ITransformer>? BuildLabelMappingPipeline(

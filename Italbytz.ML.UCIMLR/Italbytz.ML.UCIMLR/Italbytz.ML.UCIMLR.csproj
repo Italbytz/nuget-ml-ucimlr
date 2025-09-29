@@ -4,7 +4,7 @@
         <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <PackageVersion>9.2.2</PackageVersion>
+        <PackageVersion>9.2.3</PackageVersion>
         <Authors>Robin Nunkesser</Authors>
         <PackageProjectUrl>https://github.com/Italbytz/nuget-ml-ucimlr</PackageProjectUrl>
         <Description>Provides Data Sets from the UC Irvine Machine Learning Repository for Microsoft.ML.</Description>
