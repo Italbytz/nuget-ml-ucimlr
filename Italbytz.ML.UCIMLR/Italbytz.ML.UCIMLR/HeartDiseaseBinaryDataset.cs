@@ -8,6 +8,12 @@ public class
     HeartDiseaseBinaryDataset : Dataset<
     HeartDiseaseBinaryDataset.HeartDiseaseModelInput>
 {
+    private readonly LookupMap<float>[] _lookupData =
+    [
+        new(0.0f),
+        new(1.0f)
+    ];
+
     public override bool HasHeader { get; } = true;
 
     public override char Separator { get; } = ',';
@@ -162,9 +168,17 @@ public class
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
     {
-        return mlContext.Transforms.Conversion.MapValueToKey(@"num",
-                @"num", addKeyValueAnnotationsAsText: false)
-            .Append(mlContext.Transforms.CopyColumns("Label", "num"));
+        return processingType switch
+        {
+            ProcessingType.FeatureBinningAndCustomLabelMapping => mlContext
+                .Transforms.Conversion.MapValueToKey(@"Label", @"num",
+                    keyData: mlContext.Data.LoadFromEnumerable(_lookupData)),
+            ProcessingType.Standard => mlContext.Transforms.Conversion
+                .MapValueToKey(@"num", @"num",
+                    addKeyValueAnnotationsAsText: false)
+                .Append(mlContext.Transforms.CopyColumns("Label", "num")),
+            _ => throw new NotImplementedException()
+        };
     }
 
     protected override IEstimator<ITransformer> AdditionalPreprocessingPipeline(
@@ -196,6 +210,8 @@ public class
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
     {
+        if (processingType ==
+            ProcessingType.FeatureBinningAndCustomLabelMapping) return null;
         return
             mlContext.Transforms.Conversion.MapKeyToValue(@"PredictedLabel",
                 @"PredictedLabel");

@@ -83,20 +83,17 @@ public class IrisDataset : Dataset<IrisDataset.IrisModelInput>
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
     {
-        if (processingType == ProcessingType.Standard)
-            return mlContext.Transforms.Conversion.MapValueToKey(
-                    @"class",
-                    @"class", addKeyValueAnnotationsAsText: false)
-                .Append(mlContext.Transforms.CopyColumns("Label", "class"));
-
-        if (processingType ==
-            ProcessingType.FeatureBinningAndCustomLabelMapping)
-            return mlContext.Transforms.Conversion.MapValueToKey(
-                @"Label",
-                @"class",
-                keyData: mlContext.Data.LoadFromEnumerable(_lookupData));
-
-        throw new NotImplementedException();
+        return processingType switch
+        {
+            ProcessingType.Standard => mlContext.Transforms.Conversion
+                .MapValueToKey(@"class", @"class",
+                    addKeyValueAnnotationsAsText: false)
+                .Append(mlContext.Transforms.CopyColumns("Label", "class")),
+            ProcessingType.FeatureBinningAndCustomLabelMapping => mlContext
+                .Transforms.Conversion.MapValueToKey(@"Label", @"class",
+                    keyData: mlContext.Data.LoadFromEnumerable(_lookupData)),
+            _ => throw new NotImplementedException()
+        };
     }
 
     protected override IEstimator<ITransformer>? BuildFeaturizationPipeline(
