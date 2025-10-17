@@ -158,8 +158,13 @@ public abstract class Dataset<TModelInput> : IDataset
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
     {
-        return null;
+        if (processingType ==
+            ProcessingType.FeatureBinningAndCustomLabelMapping) return null;
+        return
+            mlContext.Transforms.Conversion.MapKeyToValue(@"PredictedLabel",
+                @"PredictedLabel");
     }
+
 
     private IDataView? LoadDataView()
     {

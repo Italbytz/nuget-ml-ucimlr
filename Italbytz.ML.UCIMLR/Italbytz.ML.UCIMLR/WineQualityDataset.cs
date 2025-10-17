@@ -166,14 +166,6 @@ public class
                 "quality"));
     }
 
-    protected override IEstimator<ITransformer>? BuildLabelRemappingPipeline(
-        MLContext mlContext,
-        ScenarioType scenarioType = ScenarioType.Classification,
-        ProcessingType processingType = ProcessingType.Standard)
-    {
-        return mlContext.Transforms.Conversion.MapKeyToValue(@"PredictedLabel",
-            @"PredictedLabel");
-    }
 
     public override IDataView LoadFromTextFile(string path,
         char? separatorChar = null,

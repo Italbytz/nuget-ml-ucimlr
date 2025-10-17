@@ -226,17 +226,6 @@ public class
         return pipeline;
     }
 
-    protected override IEstimator<ITransformer>? BuildLabelRemappingPipeline(
-        MLContext mlContext,
-        ScenarioType scenarioType = ScenarioType.Classification,
-        ProcessingType processingType = ProcessingType.Standard)
-    {
-        if (processingType ==
-            ProcessingType.FeatureBinningAndCustomLabelMapping) return null;
-        return
-            mlContext.Transforms.Conversion.MapKeyToValue(@"PredictedLabel",
-                @"PredictedLabel");
-    }
 
     public class HeartDiseaseModelInput
     {

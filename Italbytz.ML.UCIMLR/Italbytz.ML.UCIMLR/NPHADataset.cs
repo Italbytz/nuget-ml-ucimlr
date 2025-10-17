@@ -247,21 +247,6 @@ public class NPHADataset : Dataset<NPHADataset.NationalPollModelInput>
         throw new NotImplementedException();
     }
 
-    protected override IEstimator<ITransformer>? BuildLabelRemappingPipeline(
-        MLContext mlContext,
-        ScenarioType scenarioType = ScenarioType.Classification,
-        ProcessingType processingType = ProcessingType.Standard)
-    {
-        if (scenarioType == ScenarioType.Classification)
-        {
-            if (processingType ==
-                ProcessingType.FeatureBinningAndCustomLabelMapping) return null;
-            return mlContext.Transforms.Conversion.MapKeyToValue(
-                @"PredictedLabel", @"PredictedLabel");
-        }
-
-        throw new NotImplementedException();
-    }
 
     public class NationalPollModelInput
     {

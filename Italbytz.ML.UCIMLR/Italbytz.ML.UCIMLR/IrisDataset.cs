@@ -147,22 +147,6 @@ public class IrisDataset : Dataset<IrisDataset.IrisModelInput>
             $"The scenario type {scenarioType} is not supported.");
     }
 
-    protected override IEstimator<ITransformer>? BuildLabelRemappingPipeline(
-        MLContext mlContext,
-        ScenarioType scenarioType = ScenarioType.Classification,
-        ProcessingType processingType = ProcessingType.Standard)
-    {
-        if (scenarioType == ScenarioType.Classification)
-        {
-            if (processingType ==
-                ProcessingType.FeatureBinningAndCustomLabelMapping) return null;
-            return mlContext.Transforms.Conversion.MapKeyToValue(
-                @"PredictedLabel", @"PredictedLabel");
-        }
-
-        throw new NotSupportedException(
-            $"The scenario type {scenarioType} is not supported.");
-    }
 
     /// <summary>
     ///     Represents the input data schema for the Iris dataset used in ML.NET

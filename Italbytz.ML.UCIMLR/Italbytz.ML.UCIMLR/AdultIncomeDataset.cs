@@ -214,15 +214,6 @@ public class AdultIncomeDataset : Dataset<AdultIncomeDataset.AdultModelInput>
             });
     }
 
-    protected override IEstimator<ITransformer>? BuildLabelRemappingPipeline(
-        MLContext mlContext,
-        ScenarioType scenarioType = ScenarioType.Classification,
-        ProcessingType processingType = ProcessingType.Standard)
-    {
-        return mlContext.Transforms.Conversion.MapKeyToValue(@"PredictedLabel",
-            @"PredictedLabel");
-    }
-
     public class AdultModelInput
     {
         [LoadColumn(0)] [ColumnName(@"age")] public float Age { get; set; }

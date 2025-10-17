@@ -7,6 +7,15 @@ namespace Italbytz.ML.Data;
 public class
     HeartDiseaseDataset : Dataset<HeartDiseaseDataset.HeartDiseaseModelInput>
 {
+    private readonly LookupMap<uint>[] _lookupData =
+    [
+        new(0),
+        new(1),
+        new(2),
+        new(3),
+        new(4)
+    ];
+
     public override bool HasHeader { get; } = true;
 
     public override char Separator { get; } = ',';
@@ -151,9 +160,30 @@ public class
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
     {
-        return mlContext.Transforms.Concatenate(@"Features", @"age",
-            @"sex", @"cp", @"trestbps", @"chol", @"fbs", @"restecg",
-            @"thalach", @"exang", @"oldpeak", @"slope", @"ca", @"thal");
+        if (processingType ==
+            ProcessingType.FeatureBinningAndCustomLabelMapping)
+            return mlContext.Transforms.NormalizeBinning(new[]
+            {
+                new InputOutputColumnPair(@"age",
+                    @"age"),
+                new InputOutputColumnPair("trestbps",
+                    "trestbps"),
+                new InputOutputColumnPair(@"chol",
+                    @"chol"),
+                new InputOutputColumnPair(@"thalach",
+                    @"thalach"),
+                new InputOutputColumnPair(@"oldpeak",
+                    @"oldpeak"),
+                new InputOutputColumnPair(@"ca", @"ca")
+            }, maximumBinCount: 4).Append(mlContext.Transforms.Concatenate(
+                @"Features", @"age",
+                @"sex", @"cp", @"trestbps", @"chol", @"fbs", @"restecg",
+                @"thalach", @"exang", @"oldpeak", @"slope", @"ca", @"thal"));
+        if (processingType == ProcessingType.Standard)
+            return mlContext.Transforms.Concatenate(@"Features", @"age",
+                @"sex", @"cp", @"trestbps", @"chol", @"fbs", @"restecg",
+                @"thalach", @"exang", @"oldpeak", @"slope", @"ca", @"thal");
+        throw new NotImplementedException();
     }
 
     protected override IEstimator<ITransformer>? BuildLabelMappingPipeline(
@@ -161,9 +191,17 @@ public class
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
     {
-        return mlContext.Transforms.Conversion.MapValueToKey(@"num",
-                @"num", addKeyValueAnnotationsAsText: false)
-            .Append(mlContext.Transforms.CopyColumns("Label", "num"));
+        return processingType switch
+        {
+            ProcessingType.FeatureBinningAndCustomLabelMapping => mlContext
+                .Transforms.Conversion.MapValueToKey(@"Label", @"num",
+                    keyData: mlContext.Data.LoadFromEnumerable(_lookupData)),
+            ProcessingType.Standard => mlContext.Transforms.Conversion
+                .MapValueToKey(@"num", @"num",
+                    addKeyValueAnnotationsAsText: false)
+                .Append(mlContext.Transforms.CopyColumns("Label", "num")),
+            _ => throw new NotImplementedException()
+        };
     }
 
     protected override IEstimator<ITransformer> AdditionalPreprocessingPipeline(
@@ -192,15 +230,6 @@ public class
         return pipeline;
     }
 
-    protected override IEstimator<ITransformer>? BuildLabelRemappingPipeline(
-        MLContext mlContext,
-        ScenarioType scenarioType = ScenarioType.Classification,
-        ProcessingType processingType = ProcessingType.Standard)
-    {
-        return
-            mlContext.Transforms.Conversion.MapKeyToValue(@"PredictedLabel",
-                @"PredictedLabel");
-    }
 
     public class HeartDiseaseModelInput
     {

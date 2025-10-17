@@ -7,6 +7,13 @@ namespace Italbytz.ML.Data;
 public class
     BalanceScaleDataset : Dataset<BalanceScaleDataset.BalanceScaleModelInput>
 {
+    private readonly LookupMap<string>[] _lookupData =
+    [
+        new("B"),
+        new("R"),
+        new("L")
+    ];
+
     public override bool HasHeader { get; } = true;
 
     public override char Separator { get; } = ',';
@@ -34,8 +41,44 @@ public class
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
     {
-        throw new NotImplementedException();
+        return mlContext.Transforms.ReplaceMissingValues(new[]
+        {
+            new InputOutputColumnPair(@"right-distance",
+                @"right-distance"),
+            new InputOutputColumnPair(@"right-weight", @"right-weight"),
+            new InputOutputColumnPair(@"left-distance",
+                @"left-distance"),
+            new InputOutputColumnPair(@"left-weight", @"left-weight")
+        });
     }
+
+    protected override IEstimator<ITransformer>? BuildFeaturizationPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        return mlContext.Transforms.Concatenate(@"Features", @"right-distance",
+            @"right-weight", @"left-distance", @"left-weight");
+    }
+
+    protected override IEstimator<ITransformer>? BuildLabelMappingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        return processingType switch
+        {
+            ProcessingType.FeatureBinningAndCustomLabelMapping => mlContext
+                .Transforms.Conversion.MapValueToKey(@"Label", @"class",
+                    keyData: mlContext.Data.LoadFromEnumerable(_lookupData)),
+            ProcessingType.Standard => mlContext.Transforms.Conversion
+                .MapValueToKey(@"class", @"class",
+                    addKeyValueAnnotationsAsText: false)
+                .Append(mlContext.Transforms.CopyColumns("Label", "class")),
+            _ => throw new NotImplementedException()
+        };
+    }
+
 
     public class BalanceScaleModelInput
     {
