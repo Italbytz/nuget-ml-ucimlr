@@ -7,13 +7,13 @@ namespace Italbytz.ML.Data;
 public class
     HeartDiseaseDataset : Dataset<HeartDiseaseDataset.HeartDiseaseModelInput>
 {
-    private readonly LookupMap<uint>[] _lookupData =
+    private readonly LookupMap<float>[] _lookupData =
     [
-        new(0),
-        new(1),
-        new(2),
-        new(3),
-        new(4)
+        new(0.0f),
+        new(1.0f),
+        new(2.0f),
+        new(3.0f),
+        new(4.0f)
     ];
 
     public override bool HasHeader { get; } = true;
