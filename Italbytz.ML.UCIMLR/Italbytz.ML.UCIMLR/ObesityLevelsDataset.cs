@@ -362,9 +362,9 @@ public class
 
         [LoadColumn(4)]
         [ColumnName(@"family_history_with_overweight")]
-        public bool Family_history_with_overweight { get; set; }
+        public string Family_history_with_overweight { get; set; }
 
-        [LoadColumn(5)] [ColumnName(@"FAVC")] public bool FAVC { get; set; }
+        [LoadColumn(5)] [ColumnName(@"FAVC")] public string FAVC { get; set; }
 
         [LoadColumn(6)] [ColumnName(@"FCVC")] public float FCVC { get; set; }
 
@@ -372,11 +372,11 @@ public class
 
         [LoadColumn(8)] [ColumnName(@"CAEC")] public string CAEC { get; set; }
 
-        [LoadColumn(9)] [ColumnName(@"SMOKE")] public bool SMOKE { get; set; }
+        [LoadColumn(9)] [ColumnName(@"SMOKE")] public string SMOKE { get; set; }
 
         [LoadColumn(10)] [ColumnName(@"CH2O")] public float CH2O { get; set; }
 
-        [LoadColumn(11)] [ColumnName(@"SCC")] public bool SCC { get; set; }
+        [LoadColumn(11)] [ColumnName(@"SCC")] public string SCC { get; set; }
 
         [LoadColumn(12)] [ColumnName(@"FAF")] public float FAF { get; set; }
 
