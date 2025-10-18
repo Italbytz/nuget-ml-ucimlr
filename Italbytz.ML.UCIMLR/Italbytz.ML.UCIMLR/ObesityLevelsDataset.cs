@@ -229,8 +229,7 @@ public class
                 new InputOutputColumnPair(@"NCP", @"NCP"),
                 new InputOutputColumnPair(@"CH2O", @"CH2O"),
                 new InputOutputColumnPair(@"FAF", @"FAF"),
-                new InputOutputColumnPair(@"TUE", @"TUE"),
-                new InputOutputColumnPair(@"ca", @"ca")
+                new InputOutputColumnPair(@"TUE", @"TUE")
             }, maximumBinCount: 4).Append(mlContext.Transforms.Concatenate(
                 @"Features", @"Gender",
                 @"family_history_with_overweight", @"FAVC", @"CAEC", @"SMOKE",
