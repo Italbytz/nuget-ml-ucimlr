@@ -20,10 +20,10 @@ public class
     protected override string ResourceName { get; } =
         "Italbytz.ML.UCIMLR.Data.CDC_Diabetes_Health_Indicators.csv";
 
-    public override string FilePrefix { get; } = "ol";
+    public override string FilePrefix { get; } = "cdcd";
 
     public override string? LabelColumnName { get; } =
-        @"NObeyesdad";
+        @"Diabetes_binary";
 
     protected override string ColumnPropertiesString { get; } = """
         [

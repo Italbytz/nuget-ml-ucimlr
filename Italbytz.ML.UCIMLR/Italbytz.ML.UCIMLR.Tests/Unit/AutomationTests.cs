@@ -70,7 +70,7 @@ public class AutomationTests
         var data = Data.CDCDiabetes;
         var metrics = Simulate(data, ScenarioType.Classification,
             ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
-            _seeds, 60, 0.05f);
+            _seeds, 60, 0.05f, true);
         var accuracies = metrics.Select(m =>
             m.F1Score.ToString(CultureInfo.InvariantCulture));
         File.WriteAllLines(
