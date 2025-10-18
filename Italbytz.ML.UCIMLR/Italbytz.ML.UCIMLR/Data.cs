@@ -15,6 +15,14 @@ public static class Data
     private static IDataset? _lenses;
     private static IDataset? _npha;
     private static IDataset? _solarflare1;
+    private static IDataset? _obesityLevels;
+    private static IDataset? _cdcDiabetes;
+
+    public static IDataset CDCDiabetes =>
+        _cdcDiabetes ??= new CDCDiabetesDataset();
+
+    public static IDataset ObesityLevels =>
+        _obesityLevels ??= new ObesityLevelsDataset();
 
     public static IDataset SolarFlare1 =>
         _solarflare1 ??= new SolarFlareDataset();

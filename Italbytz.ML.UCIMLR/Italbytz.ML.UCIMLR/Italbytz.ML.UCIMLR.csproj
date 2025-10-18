@@ -4,7 +4,7 @@
         <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <PackageVersion>9.2.5</PackageVersion>
+        <PackageVersion>9.3.0</PackageVersion>
         <Authors>Robin Nunkesser</Authors>
         <PackageProjectUrl>https://github.com/Italbytz/nuget-ml-ucimlr</PackageProjectUrl>
         <Description>Provides Data Sets from the UC Irvine Machine Learning Repository for Microsoft.ML.</Description>
@@ -86,6 +86,14 @@
         </EmbeddedResource>
         <None Remove="Data\balancescale.csv"/>
         <EmbeddedResource Include="Data\balancescale.csv">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </EmbeddedResource>
+        <None Remove="Data\Estimation_of_Obesity_Levels_Based_On_Eating_Habits_and_Physical_Condition.csv"/>
+        <EmbeddedResource Include="Data\Estimation_of_Obesity_Levels_Based_On_Eating_Habits_and_Physical_Condition.csv">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </EmbeddedResource>
+        <None Remove="Data\CDC_Diabetes_Health_Indicators.csv"/>
+        <EmbeddedResource Include="Data\CDC_Diabetes_Health_Indicators.csv">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </EmbeddedResource>
     </ItemGroup>

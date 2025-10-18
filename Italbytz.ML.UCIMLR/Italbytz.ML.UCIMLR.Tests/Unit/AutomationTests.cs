@@ -49,6 +49,38 @@ public class AutomationTests
     private StreamWriter SeedWriter { get; set; }
 
     [TestMethod]
+    public void SimulateObesityLevelsClassification()
+    {
+        var data = Data.ObesityLevels;
+        var metrics = Simulate(data, ScenarioType.Classification,
+            ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
+            _seeds, 60, 0.1f);
+        var accuracies = metrics.Select(m =>
+            m.F1Score.ToString(CultureInfo.InvariantCulture));
+        File.WriteAllLines(
+            "/Users/nunkesser/repos/work/articles/logicgpbio/data/ucimlrepo/ObesityLevels/AutoML.csv",
+            accuracies);
+        Console.WriteLine(
+            string.Join(',', accuracies));
+    }
+
+    [TestMethod]
+    public void SimulateCDCDiabetesClassification()
+    {
+        var data = Data.CDCDiabetes;
+        var metrics = Simulate(data, ScenarioType.Classification,
+            ["LBFGS", "FASTFOREST", "SDCA", "FASTTREE"],
+            _seeds, 60, 0.05f);
+        var accuracies = metrics.Select(m =>
+            m.F1Score.ToString(CultureInfo.InvariantCulture));
+        File.WriteAllLines(
+            "/Users/nunkesser/repos/work/articles/logicgpbio/data/ucimlrepo/CDCDiabetes/AutoML.csv",
+            accuracies);
+        Console.WriteLine(
+            string.Join(',', accuracies));
+    }
+
+    [TestMethod]
     public void SimulateNPHAClassification()
     {
         var data = Data.NPHA;
