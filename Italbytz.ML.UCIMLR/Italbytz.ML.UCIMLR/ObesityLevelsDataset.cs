@@ -187,7 +187,125 @@ public class
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
     {
-        return mlContext.Transforms.Categorical.OneHotEncoding(
+        return mlContext.Transforms.ReplaceMissingValues(new[]
+        {
+            new InputOutputColumnPair(@"Age", @"Age"),
+            new InputOutputColumnPair(@"Height", @"Height"),
+            new InputOutputColumnPair(@"Weight", @"Weight"),
+            new InputOutputColumnPair(@"FCVC", @"FCVC"),
+            new InputOutputColumnPair(@"NCP", @"NCP"),
+            new InputOutputColumnPair(@"CH2O", @"CH2O"),
+            new InputOutputColumnPair(@"FAF", @"FAF"),
+            new InputOutputColumnPair(@"TUE", @"TUE")
+        });
+    }
+
+    protected override IEstimator<ITransformer>? BuildFeaturizationPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        var genderLookupData = new[]
+        {
+            new CategoryLookupMap { Value = 0f, Category = "Female" },
+            new CategoryLookupMap { Value = 1f, Category = "Male" }
+        };
+        var genderLookupIdvMap =
+            mlContext.Data.LoadFromEnumerable(genderLookupData);
+
+        var yesNoLookupData = new[]
+        {
+            new CategoryLookupMap { Value = 0f, Category = "no" },
+            new CategoryLookupMap { Value = 1f, Category = "yes" }
+        };
+        var yesNoLookupIdvMap =
+            mlContext.Data.LoadFromEnumerable(yesNoLookupData);
+
+        var frequencyLookupData = new[]
+        {
+            new CategoryLookupMap { Value = 0f, Category = "no" },
+            new CategoryLookupMap { Value = 1f, Category = "Sometimes" },
+            new CategoryLookupMap { Value = 2f, Category = "Frequently" },
+            new CategoryLookupMap { Value = 3f, Category = "Always" }
+        };
+        var frequencyLookupIdvMap =
+            mlContext.Data.LoadFromEnumerable(frequencyLookupData);
+
+        var mtransLookupData = new[]
+        {
+            new CategoryLookupMap { Value = 0f, Category = "Automobile" },
+            new CategoryLookupMap { Value = 1f, Category = "Bike" },
+            new CategoryLookupMap
+                { Value = 2f, Category = "Public_Transportation" },
+            new CategoryLookupMap { Value = 3f, Category = "Walking" },
+            new CategoryLookupMap { Value = 4f, Category = "Motorbike" }
+        };
+        var mtransLookupIdvMap =
+            mlContext.Data.LoadFromEnumerable(mtransLookupData);
+
+        if (processingType ==
+            ProcessingType.FeatureBinningAndCustomLabelMapping)
+            return mlContext.Transforms.Conversion.MapValue("Gender",
+                    genderLookupIdvMap, genderLookupIdvMap.Schema["Category"],
+                    genderLookupIdvMap.Schema[
+                        "Value"], "Gender")
+                .Append(mlContext.Transforms.Conversion.MapValue(
+                    "family_history_with_overweight",
+                    yesNoLookupIdvMap, yesNoLookupIdvMap.Schema["Category"],
+                    yesNoLookupIdvMap.Schema[
+                        "Value"], "family_history_with_overweight"))
+                .Append(mlContext.Transforms.Conversion.MapValue(
+                    "FAVC",
+                    yesNoLookupIdvMap, yesNoLookupIdvMap.Schema["Category"],
+                    yesNoLookupIdvMap.Schema[
+                        "Value"], "FAVC"))
+                .Append(mlContext.Transforms.Conversion.MapValue(
+                    "CAEC",
+                    frequencyLookupIdvMap,
+                    frequencyLookupIdvMap.Schema["Category"],
+                    frequencyLookupIdvMap.Schema[
+                        "Value"], "CAEC"))
+                .Append(mlContext.Transforms.Conversion.MapValue(
+                    "SMOKE",
+                    yesNoLookupIdvMap, yesNoLookupIdvMap.Schema["Category"],
+                    yesNoLookupIdvMap.Schema[
+                        "Value"], "SMOKE"))
+                .Append(mlContext.Transforms.Conversion.MapValue(
+                    "SCC",
+                    yesNoLookupIdvMap, yesNoLookupIdvMap.Schema["Category"],
+                    yesNoLookupIdvMap.Schema[
+                        "Value"], "SCC"))
+                .Append(mlContext.Transforms.Conversion.MapValue(
+                    "CALC",
+                    frequencyLookupIdvMap,
+                    frequencyLookupIdvMap.Schema["Category"],
+                    frequencyLookupIdvMap.Schema[
+                        "Value"], "CALC"))
+                .Append(mlContext.Transforms.Conversion.MapValue(
+                    "MTRANS",
+                    mtransLookupIdvMap,
+                    mtransLookupIdvMap.Schema["Category"],
+                    mtransLookupIdvMap.Schema[
+                        "Value"], "MTRANS"))
+                .Append(mlContext.Transforms.NormalizeBinning(new[]
+                {
+                    new InputOutputColumnPair(@"Age", @"Age"),
+                    new InputOutputColumnPair(@"Height", @"Height"),
+                    new InputOutputColumnPair(@"Weight", @"Weight"),
+                    new InputOutputColumnPair(@"FCVC", @"FCVC"),
+                    new InputOutputColumnPair(@"NCP", @"NCP"),
+                    new InputOutputColumnPair(@"CH2O", @"CH2O"),
+                    new InputOutputColumnPair(@"FAF", @"FAF"),
+                    new InputOutputColumnPair(@"TUE", @"TUE")
+                }, maximumBinCount: 4))
+                .Append(mlContext.Transforms.Concatenate(
+                    @"Features", @"Gender",
+                    @"family_history_with_overweight", @"FAVC", @"CAEC",
+                    @"SMOKE",
+                    @"SCC", @"CALC", @"MTRANS", @"Age", @"Height", @"Weight",
+                    @"FCVC", @"NCP", @"CH2O", @"FAF", @"TUE"));
+        if (processingType == ProcessingType.Standard)
+            return mlContext.Transforms.Categorical.OneHotEncoding(
                 new[]
                 {
                     new InputOutputColumnPair(@"Gender", @"Gender"),
@@ -199,47 +317,11 @@ public class
                     new InputOutputColumnPair(@"SCC", @"SCC"),
                     new InputOutputColumnPair(@"CALC", @"CALC"),
                     new InputOutputColumnPair(@"MTRANS", @"MTRANS")
-                })
-            .Append(mlContext.Transforms.ReplaceMissingValues(new[]
-            {
-                new InputOutputColumnPair(@"Age", @"Age"),
-                new InputOutputColumnPair(@"Height", @"Height"),
-                new InputOutputColumnPair(@"Weight", @"Weight"),
-                new InputOutputColumnPair(@"FCVC", @"FCVC"),
-                new InputOutputColumnPair(@"NCP", @"NCP"),
-                new InputOutputColumnPair(@"CH2O", @"CH2O"),
-                new InputOutputColumnPair(@"FAF", @"FAF"),
-                new InputOutputColumnPair(@"TUE", @"TUE")
-            }));
-    }
-
-    protected override IEstimator<ITransformer>? BuildFeaturizationPipeline(
-        MLContext mlContext,
-        ScenarioType scenarioType = ScenarioType.Classification,
-        ProcessingType processingType = ProcessingType.Standard)
-    {
-        if (processingType ==
-            ProcessingType.FeatureBinningAndCustomLabelMapping)
-            return mlContext.Transforms.NormalizeBinning(new[]
-            {
-                new InputOutputColumnPair(@"Age", @"Age"),
-                new InputOutputColumnPair(@"Height", @"Height"),
-                new InputOutputColumnPair(@"Weight", @"Weight"),
-                new InputOutputColumnPair(@"FCVC", @"FCVC"),
-                new InputOutputColumnPair(@"NCP", @"NCP"),
-                new InputOutputColumnPair(@"CH2O", @"CH2O"),
-                new InputOutputColumnPair(@"FAF", @"FAF"),
-                new InputOutputColumnPair(@"TUE", @"TUE")
-            }, maximumBinCount: 4).Append(mlContext.Transforms.Concatenate(
-                @"Features", @"Gender",
+                }).Append(mlContext.Transforms.Concatenate(@"Features",
+                @"Gender",
                 @"family_history_with_overweight", @"FAVC", @"CAEC", @"SMOKE",
                 @"SCC", @"CALC", @"MTRANS", @"Age", @"Height", @"Weight",
                 @"FCVC", @"NCP", @"CH2O", @"FAF", @"TUE"));
-        if (processingType == ProcessingType.Standard)
-            return mlContext.Transforms.Concatenate(@"Features", @"Gender",
-                @"family_history_with_overweight", @"FAVC", @"CAEC", @"SMOKE",
-                @"SCC", @"CALC", @"MTRANS", @"Age", @"Height", @"Weight",
-                @"FCVC", @"NCP", @"CH2O", @"FAF", @"TUE");
         throw new NotImplementedException();
     }
 
