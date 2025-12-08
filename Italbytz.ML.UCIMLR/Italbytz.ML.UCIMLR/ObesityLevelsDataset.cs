@@ -290,14 +290,17 @@ public class
                 .Append(mlContext.Transforms.NormalizeBinning(new[]
                 {
                     new InputOutputColumnPair(@"Age", @"Age"),
-                    new InputOutputColumnPair(@"Height", @"Height"),
-                    new InputOutputColumnPair(@"Weight", @"Weight"),
                     new InputOutputColumnPair(@"FCVC", @"FCVC"),
-                    new InputOutputColumnPair(@"NCP", @"NCP"),
                     new InputOutputColumnPair(@"CH2O", @"CH2O"),
                     new InputOutputColumnPair(@"FAF", @"FAF"),
                     new InputOutputColumnPair(@"TUE", @"TUE")
                 }, maximumBinCount: 4))
+                .Append(mlContext.Transforms.NormalizeBinning(new[]
+                {
+                    new InputOutputColumnPair(@"Height", @"Height"),
+                    new InputOutputColumnPair(@"Weight", @"Weight"),
+                    new InputOutputColumnPair(@"NCP", @"NCP")
+                }, maximumBinCount: 7))
                 .Append(mlContext.Transforms.Concatenate(
                     @"Features", @"Gender",
                     @"family_history_with_overweight", @"FAVC", @"CAEC",
