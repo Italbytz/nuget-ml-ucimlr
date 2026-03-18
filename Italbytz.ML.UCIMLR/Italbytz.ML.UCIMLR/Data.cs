@@ -2,6 +2,7 @@ namespace Italbytz.ML.Data;
 
 public static class Data
 {
+    private static IDataset? _banknoteAuthentication;
     private static IDataset? _iris;
     private static IDataset? _breastCancerWisconsinDiagnostic;
     private static IDataset? _wineQuality;
@@ -17,6 +18,8 @@ public static class Data
     private static IDataset? _solarflare1;
     private static IDataset? _obesityLevels;
     private static IDataset? _cdcDiabetes;
+    private static IDataset? _pageBlocks;
+    private static IDataset? _wine;
 
     public static IDataset CDCDiabetes =>
         _cdcDiabetes ??= new CDCDiabetesDataset();
@@ -62,4 +65,12 @@ public static class Data
 
     public static IDataset Adult =>
         _adult ??= new AdultIncomeDataset();
+
+    public static IDataset BanknoteAuthentication =>
+        _banknoteAuthentication ??= new BanknoteAuthenticationDataset();
+
+    public static IDataset? PageBlocks =>
+        _pageBlocks ??= new PageBlocksDataset();
+
+    public static IDataset Wine => _wine ??= new WineDataset();
 }
