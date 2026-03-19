@@ -193,7 +193,7 @@ public class
                     buyingLookupIdvMap, buyingLookupIdvMap.Schema["Category"],
                     buyingLookupIdvMap.Schema["Value"], "buying").Append(
                     mlContext.Transforms.Conversion.MapValue(
-                        @"maintenance", maintLookupIdvMap,
+                        @"maint", maintLookupIdvMap,
                         maintLookupIdvMap.Schema["Category"],
                         maintLookupIdvMap.Schema["Value"], "maint")).Append(
                     mlContext.Transforms.Conversion.MapValue(
