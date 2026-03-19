@@ -20,6 +20,9 @@ public static class Data
     private static IDataset? _cdcDiabetes;
     private static IDataset? _pageBlocks;
     private static IDataset? _wine;
+    private static IDataset? _multiplexer6;
+    private static IDataset? _multiplexer11;
+    private static IDataset? _multiplexer20;
 
     public static IDataset CDCDiabetes =>
         _cdcDiabetes ??= new CDCDiabetesDataset();
@@ -73,4 +76,13 @@ public static class Data
         _pageBlocks ??= new PageBlocksDataset();
 
     public static IDataset Wine => _wine ??= new WineDataset();
+
+    public static IDataset Multiplexer6 =>
+        _multiplexer6 ??= new Multiplexer6Dataset();
+
+    public static IDataset Multiplexer11 =>
+        _multiplexer11 ??= new Multiplexer11Dataset();
+
+    public static IDataset Multiplexer20 =>
+        _multiplexer20 ??= new Multiplexer20Dataset();
 }

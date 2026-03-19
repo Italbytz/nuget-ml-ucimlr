@@ -4,7 +4,7 @@
         <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <PackageVersion>10.0.2</PackageVersion>
+        <PackageVersion>10.0.3</PackageVersion>
         <Authors>Robin Nunkesser</Authors>
         <PackageProjectUrl>https://github.com/Italbytz/nuget-ml-ucimlr</PackageProjectUrl>
         <Description>Provides Data Sets from the UC Irvine Machine Learning Repository for Microsoft.ML.</Description>
@@ -106,6 +106,18 @@
         </EmbeddedResource>
         <None Remove="Data\Banknote_Authentication.csv"/>
         <EmbeddedResource Include="Data\Banknote_Authentication.csv">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </EmbeddedResource>
+        <None Remove="Data\Multiplexer6.csv"/>
+        <EmbeddedResource Include="Data\Multiplexer6.csv">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </EmbeddedResource>
+        <None Remove="Data\Multiplexer11.csv"/>
+        <EmbeddedResource Include="Data\Multiplexer11.csv">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </EmbeddedResource>
+        <None Remove="Data\Multiplexer20.csv"/>
+        <EmbeddedResource Include="Data\Multiplexer20.csv">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </EmbeddedResource>
     </ItemGroup>
