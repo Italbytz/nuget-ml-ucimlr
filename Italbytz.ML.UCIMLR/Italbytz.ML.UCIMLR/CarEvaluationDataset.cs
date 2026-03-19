@@ -47,7 +47,7 @@ public class
           {
             "ColumnName": "doors",
             "ColumnPurpose": "Feature",
-            "ColumnDataFormat": "Single",
+            "ColumnDataFormat": "String",
             "IsCategorical": true,
             "Type": "Column",
             "Version": 5
@@ -55,7 +55,7 @@ public class
           {
             "ColumnName": "persons",
             "ColumnPurpose": "Feature",
-            "ColumnDataFormat": "Single",
+            "ColumnDataFormat": "String",
             "IsCategorical": true,
             "Type": "Column",
             "Version": 5
@@ -103,11 +103,26 @@ public class
         ScenarioType scenarioType = ScenarioType.Classification,
         ProcessingType processingType = ProcessingType.Standard)
     {
-        return mlContext.Transforms.ReplaceMissingValues(new[]
+        return mlContext.Transforms.ReplaceMissingValues(
+            []);
+    }
+
+    protected override IEstimator<ITransformer>? BuildLabelMappingPipeline(
+        MLContext mlContext,
+        ScenarioType scenarioType = ScenarioType.Classification,
+        ProcessingType processingType = ProcessingType.Standard)
+    {
+        return processingType switch
         {
-            new InputOutputColumnPair(@"doors", @"doors"),
-            new InputOutputColumnPair(@"persons", @"persons")
-        });
+            ProcessingType.Standard => mlContext.Transforms.Conversion
+                .MapValueToKey(@"class", @"class",
+                    addKeyValueAnnotationsAsText: false)
+                .Append(mlContext.Transforms.CopyColumns("Label", "class")),
+            ProcessingType.FeatureBinningAndCustomLabelMapping => mlContext
+                .Transforms.Conversion.MapValueToKey(@"Label", @"class",
+                    keyData: mlContext.Data.LoadFromEnumerable(_lookupData)),
+            _ => throw new NotImplementedException()
+        };
     }
 
     protected override IEstimator<ITransformer>? BuildFeaturizationPipeline(
@@ -207,7 +222,9 @@ public class
                         new InputOutputColumnPair(@"buying", @"buying"),
                         new InputOutputColumnPair(@"maint", @"maint"),
                         new InputOutputColumnPair(@"lug_boot", @"lug_boot"),
-                        new InputOutputColumnPair(@"safety", @"safety")
+                        new InputOutputColumnPair(@"safety", @"safety"),
+                        new InputOutputColumnPair(@"doors", @"doors"),
+                        new InputOutputColumnPair(@"persons", @"persons")
                     })
                 .Append(mlContext.Transforms.Concatenate(@"Features",
                     @"buying",
